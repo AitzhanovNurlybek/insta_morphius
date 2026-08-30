@@ -1,0 +1,38 @@
+[
+  {
+    "full_name": "Айгерим Сатыбалды",
+    "nickname": "aika.almaty",
+    "city": "Алматы",
+    "niches": ["Food", "Lifestyle"],
+    "instagram_url": "https://instagram.com/aika.almaty",
+    "tiktok_url": "https://tiktok.com/@aika.almaty",
+    "ig_followers": 84000,
+    "tt_followers": 51000,
+    "price_min": 120000,
+    "price_max": 180000,
+    "tier": "recommended",
+    "notes": "Кафе и доставка, всегда сдаёт в срок",
+    "contact_telegram": "@aika",
+    "portfolio": [
+      { "title": "Обзор кофейни", "url": "https://instagram.com/reel/xxxx" }
+    ],
+    "recent_posts": [
+      { "views": 62000, "likes": 3100, "comments": 84 },
+      { "views": 45000, "likes": 2400, "comments": 51 },
+      { "views": 78000, "likes": 4100, "comments": 130 }
+    ]
+  },
+  {
+    "full_name": "Данияр Ким",
+    "nickname": "kim.drives",
+    "city": "Алматы",
+    "niches": ["Auto"],
+    "instagram_url": "https://instagram.com/kim.drives",
+    "ig_followers": 32000,
+    "engagement_rate": 6.1,
+    "avg_reels_views": 41000,
+    "price_min": 60000,
+    "price_max": 90000,
+    "tier": "novice"
+  }
+]

@@ -1,0 +1,143 @@
+@import "tailwindcss";
+
+/* Палитра из п.7 ТЗ: графит #1C1E22 + зелёный акцент #00D28E. Без лишней анимации. */
+@theme {
+  --color-ink: #1c1e22;
+  --color-ink-2: #23262b;
+  --color-ink-3: #2b2f35;
+  --color-line: #33383f;
+  --color-text: #e7eaee;
+  --color-muted: #8b939e;
+  --color-accent: #00d28e;
+  --color-accent-dim: #00a874;
+  --color-warn: #f0b429;
+  --color-danger: #e5484d;
+
+  --font-sans: ui-sans-serif, system-ui, "Segoe UI", Roboto, Arial, sans-serif;
+}
+
+html,
+body {
+  background: var(--color-ink);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+}
+
+* {
+  border-color: var(--color-line);
+}
+
+@layer components {
+  .panel {
+    background: var(--color-ink-2);
+    border: 1px solid var(--color-line);
+    border-radius: 12px;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.95rem;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    border: 1px solid var(--color-line);
+    background: var(--color-ink-3);
+    color: var(--color-text);
+    cursor: pointer;
+  }
+  .btn:hover {
+    background: #343941;
+  }
+  .btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .btn-primary {
+    background: var(--color-accent);
+    border-color: var(--color-accent);
+    color: #08130f;
+    font-weight: 600;
+  }
+  .btn-primary:hover {
+    background: var(--color-accent-dim);
+    border-color: var(--color-accent-dim);
+  }
+
+  .btn-ghost {
+    background: transparent;
+  }
+  .btn-ghost:hover {
+    background: var(--color-ink-3);
+  }
+
+  .input,
+  .select,
+  .textarea {
+    width: 100%;
+    padding: 0.5rem 0.7rem;
+    border-radius: 8px;
+    background: var(--color-ink);
+    border: 1px solid var(--color-line);
+    color: var(--color-text);
+    font-size: 0.9rem;
+  }
+  .input:focus,
+  .select:focus,
+  .textarea:focus {
+    outline: none;
+    border-color: var(--color-accent);
+  }
+  .textarea {
+    min-height: 90px;
+    resize: vertical;
+  }
+
+  .label {
+    display: block;
+    font-size: 0.78rem;
+    color: var(--color-muted);
+    margin-bottom: 0.3rem;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.15rem 0.55rem;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    border: 1px solid var(--color-line);
+    background: var(--color-ink-3);
+    color: var(--color-muted);
+    white-space: nowrap;
+  }
+  .badge-accent {
+    background: color-mix(in srgb, var(--color-accent) 15%, transparent);
+    border-color: color-mix(in srgb, var(--color-accent) 45%, transparent);
+    color: var(--color-accent);
+  }
+  .badge-warn {
+    background: color-mix(in srgb, var(--color-warn) 14%, transparent);
+    border-color: color-mix(in srgb, var(--color-warn) 40%, transparent);
+    color: var(--color-warn);
+  }
+
+  .th {
+    text-align: left;
+    font-size: 0.74rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--color-muted);
+    font-weight: 500;
+    padding: 0.6rem 0.75rem;
+  }
+  .td {
+    padding: 0.7rem 0.75rem;
+    font-size: 0.875rem;
+    border-top: 1px solid var(--color-line);
+  }
+}
