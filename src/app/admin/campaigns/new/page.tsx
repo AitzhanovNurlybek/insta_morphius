@@ -30,7 +30,7 @@ export default async function AdminNewCampaignPage({
         Заполняется со слов клиента, если он не заводил личный кабинет.
       </p>
       {error && (
-        <p className="mb-4 rounded-lg border border-[var(--color-danger)] px-3 py-2 text-sm text-[var(--color-danger)]">
+        <p className="note note-err mb-4">
           {error}
         </p>
       )}

@@ -98,7 +98,7 @@ export default async function CampaignPage({
       />
 
       {f.error && (
-        <p className="mb-4 rounded-lg border border-[var(--color-danger)] px-3 py-2 text-sm text-[var(--color-danger)]">
+        <p className="note note-err mb-4">
           {f.error}
         </p>
       )}
@@ -107,7 +107,7 @@ export default async function CampaignPage({
         <div className="space-y-5">
           {/* ── БРИФ ── */}
           <section className="panel p-5">
-            <h2 className="mb-3 text-sm font-medium text-[var(--color-muted)]">Бриф</h2>
+            <h2 className="t-section mb-3">Бриф</h2>
             {campaign.goal && <p className="mb-4 text-sm">{campaign.goal}</p>}
             <div className="grid gap-x-6 gap-y-2 text-sm sm:grid-cols-2">
               <Row label="Бизнес" value={campaign.businesses?.name ?? "—"} />
@@ -135,7 +135,7 @@ export default async function CampaignPage({
           {/* ── ПРИКРЕПЛЁННЫЕ CREATORS ── */}
           <section className="panel p-5">
             <div className="mb-3 flex items-baseline justify-between">
-              <h2 className="text-sm font-medium text-[var(--color-muted)]">
+              <h2 className="t-section">
                 Creators в кампании ({tasks.length})
               </h2>
               <span className="text-sm text-[var(--color-muted)]">
@@ -153,7 +153,7 @@ export default async function CampaignPage({
                   <form
                     key={t.id}
                     action={updateTask.bind(null, campaign.id, t.id)}
-                    className="rounded-lg border border-[var(--color-line)] bg-[var(--color-ink)] p-4"
+                    className="rounded-lg border border-[var(--color-line)] bg-[var(--color-bg)] p-4"
                   >
                     <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
                       <div>
@@ -168,9 +168,21 @@ export default async function CampaignPage({
                           {t.creators?.engagement_rate ?? "—"}%
                         </span>
                       </div>
-                      <span className="text-xs text-[var(--color-muted)]">
-                        прайс {priceRange(t.creators?.price_min ?? null, t.creators?.price_max ?? null)}
-                      </span>
+                      <div className="flex items-center gap-3">
+                        <span className="text-xs text-[var(--color-muted)]">
+                          прайс {priceRange(t.creators?.price_min ?? null, t.creators?.price_max ?? null)}
+                        </span>
+                        {/* formAction внутри той же формы: вложенные формы в HTML запрещены,
+                            а держать открепление отдельным списком внизу — неудобно */}
+                        <button
+                          type="submit"
+                          formAction={detachCreator.bind(null, campaign.id, t.id)}
+                          className="btn btn-ghost btn-sm"
+                          title="Убрать из кампании"
+                        >
+                          Убрать
+                        </button>
+                      </div>
                     </div>
 
                     <div className="grid gap-3 sm:grid-cols-4">
@@ -229,23 +241,13 @@ export default async function CampaignPage({
                     </details>
                   </form>
                 ))}
-                {/* Открепление — отдельной формой, чтобы не мешать сохранению задачи */}
-                <div className="flex flex-wrap gap-2 pt-1">
-                  {tasks.map((t) => (
-                    <form key={t.id} action={detachCreator.bind(null, campaign.id, t.id)}>
-                      <button className="btn btn-ghost text-xs" type="submit">
-                        Открепить {t.creators?.nickname ?? t.creators?.full_name}
-                      </button>
-                    </form>
-                  ))}
-                </div>
               </div>
             )}
           </section>
 
           {/* ── ПОДБОР ── */}
           <section className="panel p-5">
-            <h2 className="mb-3 text-sm font-medium text-[var(--color-muted)]">
+            <h2 className="t-section mb-3">
               Подобрать creators
             </h2>
 
@@ -286,7 +288,7 @@ export default async function CampaignPage({
                   {candidates.map((c) => (
                     <label
                       key={c.id}
-                      className="flex cursor-pointer items-center gap-3 rounded-lg border border-[var(--color-line)] bg-[var(--color-ink)] px-3 py-2 text-sm hover:border-[var(--color-accent)]"
+                      className="flex cursor-pointer items-center gap-3 rounded-lg border border-[var(--color-line)] bg-[var(--color-bg)] px-3 py-2 text-sm hover:border-[var(--color-accent)]"
                     >
                       <input
                         type="checkbox"
@@ -312,7 +314,7 @@ export default async function CampaignPage({
 
           {/* ── ОТЧЁТ ── */}
           <section className="panel p-5">
-            <h2 className="mb-3 text-sm font-medium text-[var(--color-muted)]">Итоговый отчёт</h2>
+            <h2 className="t-section mb-3">Итоговый отчёт</h2>
             <form action={saveReport.bind(null, campaign.id)} className="space-y-4">
               <Field label="Текст отчёта" hint="Клиент видит его в своём кабинете">
                 <textarea
@@ -358,7 +360,7 @@ export default async function CampaignPage({
         {/* ── ПРАВАЯ КОЛОНКА: СТАТУС ── */}
         <aside className="space-y-5">
           <section className="panel p-5">
-            <h2 className="mb-3 text-sm font-medium text-[var(--color-muted)]">Статус кампании</h2>
+            <h2 className="t-section mb-3">Статус кампании</h2>
             <div className="mb-4">
               <StatusBadge status={campaign.status} />
             </div>
@@ -375,7 +377,7 @@ export default async function CampaignPage({
           </section>
 
           <section className="panel p-5">
-            <h2 className="mb-3 text-sm font-medium text-[var(--color-muted)]">История статусов</h2>
+            <h2 className="t-section mb-3">История статусов</h2>
             {log.length === 0 ? (
               <Empty text="Пока пусто" />
             ) : (

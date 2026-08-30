@@ -31,7 +31,7 @@ export default async function DeletionStatusPage({
         <>
           <p>
             Запрос с кодом{" "}
-            <code className="rounded bg-[var(--color-ink-3)] px-1.5 py-0.5">{code}</code> не
+            <code className="rounded bg-[var(--color-surface-2)] px-1.5 py-0.5">{code}</code> не
             найден. Проверьте код или напишите на{" "}
             <a href={`mailto:${CONTACT_EMAIL}`} className="text-[var(--color-accent)]">
               {CONTACT_EMAIL}
@@ -46,7 +46,7 @@ export default async function DeletionStatusPage({
         <>
           <p>
             Код:{" "}
-            <code className="rounded bg-[var(--color-ink-3)] px-1.5 py-0.5">{request.code}</code>
+            <code className="rounded bg-[var(--color-surface-2)] px-1.5 py-0.5">{request.code}</code>
           </p>
           <p>Запрос получен: {dateTime(request.requested_at)}</p>
           {request.completed_at ? (
@@ -58,7 +58,7 @@ export default async function DeletionStatusPage({
               </span>
             </p>
           ) : (
-            <p className="text-[var(--color-warn)]">
+            <p className="text-[var(--color-gold)]">
               В работе. Мы завершим удаление в течение 30 дней и ответим на почту.
               <span className="block text-[var(--color-muted)]">
                 In progress. Deletion will be completed within 30 days.

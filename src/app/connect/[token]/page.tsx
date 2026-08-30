@@ -39,13 +39,13 @@ export default async function ConnectPage({
         </p>
 
         {error && ERRORS[error] && (
-          <p className="mb-4 rounded-lg border border-[var(--color-warn)] px-3 py-2 text-sm text-[var(--color-warn)]">
+          <p className="note note-warn mb-4">
             {ERRORS[error]}
           </p>
         )}
 
         {creator.instagram_connected ? (
-          <p className="mb-4 rounded-lg border border-[var(--color-accent)] px-3 py-2 text-sm text-[var(--color-accent)]">
+          <p className="note note-ok mb-4">
             Аккаунт {creator.instagram_username ? `@${creator.instagram_username}` : ""} уже
             подключён. Повторное подключение обновит цифры.
           </p>

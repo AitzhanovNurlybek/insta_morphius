@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { DEMO_COOKIE, isDemo } from "@/lib/demo/mode";
 
 const PUBLIC_PATHS = [
   "/login",
@@ -16,6 +17,23 @@ const PUBLIC_PATHS = [
 ];
 
 export async function proxy(request: NextRequest) {
+  const path = request.nextUrl.pathname;
+  const isPublic = PUBLIC_PATHS.some((p) => path.startsWith(p));
+
+  const toLogin = () => {
+    const url = request.nextUrl.clone();
+    url.pathname = "/login";
+    url.searchParams.set("next", path);
+    return NextResponse.redirect(url);
+  };
+
+  // Демо-режим: вместо сессии Supabase — кука с выбранной ролью.
+  if (isDemo()) {
+    const role = request.cookies.get(DEMO_COOKIE)?.value;
+    if (!role && !isPublic) return toLogin();
+    return NextResponse.next({ request });
+  }
+
   let response = NextResponse.next({ request });
 
   const supabase = createServerClient(
@@ -44,15 +62,7 @@ export async function proxy(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const path = request.nextUrl.pathname;
-  const isPublic = PUBLIC_PATHS.some((p) => path.startsWith(p));
-
-  if (!user && !isPublic) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/login";
-    url.searchParams.set("next", path);
-    return NextResponse.redirect(url);
-  }
+  if (!user && !isPublic) return toLogin();
 
   return response;
 }

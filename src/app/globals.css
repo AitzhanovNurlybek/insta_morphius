@@ -1,38 +1,164 @@
 @import "tailwindcss";
 
-/* Палитра из п.7 ТЗ: графит #1C1E22 + зелёный акцент #00D28E. Без лишней анимации. */
+/* ============================================================
+   Палитра: тёмно-красная.
+
+   Нейтральная база не серая, а с красным подтоном (hue ~10°,
+   низкая насыщенность) — на ней багрянец читается как часть
+   одной семьи, а не как наклейка поверх графита.
+
+   Поддерживающие цвета выбраны как классические пары к вину:
+   тёплое золото и приглушённый нефрит (комплементарный к красному,
+   притушен, чтобы не спорить с брендом). Больше цветов не вводим —
+   иначе статусы перестают читаться с одного взгляда.
+   ============================================================ */
+
 @theme {
-  --color-ink: #1c1e22;
-  --color-ink-2: #23262b;
-  --color-ink-3: #2b2f35;
-  --color-line: #33383f;
-  --color-text: #e7eaee;
-  --color-muted: #8b939e;
-  --color-accent: #00d28e;
-  --color-accent-dim: #00a874;
-  --color-warn: #f0b429;
-  --color-danger: #e5484d;
+  /* Нейтральная база */
+  --color-bg: #120a0c;
+  --color-surface: #1a1013;
+  --color-surface-2: #23161a;
+  --color-surface-3: #2e1d22;
+  --color-line: #38232a;
+  --color-line-strong: #4e3138;
+
+  /* Текст */
+  --color-text: #f5eced;
+  --color-text-2: #cbb2b7;
+  --color-muted: #9a8288;
+
+  /* Брендовый красный */
+  --color-wine: #4a0f1a;
+  --color-red-700: #8e1626;
+  --color-red-600: #b01c30;
+  --color-accent: #d42a42;
+  --color-red-400: #e8546a;
+
+  /* Поддерживающие */
+  --color-gold: #e0a458;
+  --color-jade: #4fa383;
+  --color-danger: #ff6b57;
 
   --font-sans: ui-sans-serif, system-ui, "Segoe UI", Roboto, Arial, sans-serif;
+
+  /* Тени тёплые: нейтрально-серая тень на красном фоне выглядит грязной */
+  --shadow-card: 0 1px 2px rgba(10, 4, 6, 0.4), 0 8px 24px -12px rgba(10, 4, 6, 0.6);
+  --shadow-lift: 0 2px 4px rgba(10, 4, 6, 0.4), 0 16px 40px -16px rgba(74, 15, 26, 0.7);
 }
 
-html,
-body {
-  background: var(--color-ink);
+/* ─────────────────────────  ОСНОВА  ───────────────────────── */
+
+html {
+  background: var(--color-bg);
+  /* Мягкое свечение вина сверху — глубина без картинки на фоне */
+  background-image:
+    radial-gradient(1200px 600px at 50% -300px, rgba(212, 42, 66, 0.12), transparent 70%),
+    radial-gradient(900px 500px at 100% 0, rgba(74, 15, 26, 0.35), transparent 60%);
+  background-attachment: fixed;
   color: var(--color-text);
   font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  background: transparent;
+  min-height: 100vh;
 }
 
 * {
   border-color: var(--color-line);
 }
 
+::selection {
+  background: rgba(212, 42, 66, 0.35);
+  color: var(--color-text);
+}
+
+/* Фокус виден всегда и одинаково — иначе клавиатурой по формам не пройти */
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* Полосы прокрутки в тон, а не системные светлые */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-line-strong) transparent;
+}
+
+/* ─────────────────────  ТИПОГРАФИКА  ─────────────────────
+   Трекинг зависит от кегля: крупный текст поджимаем,
+   мелкий — разряжаем. Один letter-spacing на все размеры
+   всегда неверен где-то на краю шкалы. */
+
 @layer components {
-  .panel {
-    background: var(--color-ink-2);
-    border: 1px solid var(--color-line);
-    border-radius: 12px;
+  .t-display {
+    font-size: clamp(1.75rem, 1.2rem + 1.6vw, 2.4rem);
+    line-height: 1.08;
+    letter-spacing: -0.022em;
+    font-weight: 600;
   }
+
+  .t-title {
+    font-size: 1.25rem;
+    line-height: 1.2;
+    letter-spacing: -0.015em;
+    font-weight: 600;
+  }
+
+  .t-section {
+    font-size: 0.75rem;
+    line-height: 1.3;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: var(--color-muted);
+  }
+
+  .t-num {
+    font-size: 1.75rem;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ─────────────────────  ПОВЕРХНОСТИ  ───────────────────── */
+
+  .panel {
+    background: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--color-surface) 96%, white 4%),
+      var(--color-surface)
+    );
+    border: 1px solid var(--color-line);
+    border-radius: 14px;
+    box-shadow: var(--shadow-card);
+  }
+
+  /* Стеклянная шапка: содержимое уезжает под неё, а не упирается в полосу */
+  .chrome {
+    background: color-mix(in srgb, var(--color-surface) 72%, transparent);
+    backdrop-filter: blur(20px) saturate(160%);
+    -webkit-backdrop-filter: blur(20px) saturate(160%);
+    border-bottom: 1px solid var(--color-line);
+    /* светлый верхний кант — материал ловит свет */
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  }
+
+  .hairline {
+    border-top: 1px solid var(--color-line);
+  }
+
+  /* ─────────────────────  КНОПКИ  ─────────────────────
+     Отклик на нажатие, а не на отпускание: подсветка должна
+     появляться в тот же кадр, когда палец коснулся. */
 
   .btn {
     display: inline-flex;
@@ -40,104 +166,284 @@ body {
     justify-content: center;
     gap: 0.5rem;
     padding: 0.5rem 0.95rem;
-    border-radius: 8px;
+    border-radius: 10px;
     font-size: 0.875rem;
     font-weight: 500;
-    border: 1px solid var(--color-line);
-    background: var(--color-ink-3);
+    letter-spacing: -0.005em;
+    border: 1px solid var(--color-line-strong);
+    background: var(--color-surface-2);
     color: var(--color-text);
     cursor: pointer;
+    transition:
+      background-color 140ms ease-out,
+      border-color 140ms ease-out,
+      transform 100ms ease-out,
+      opacity 140ms ease-out;
+    user-select: none;
   }
   .btn:hover {
-    background: #343941;
+    background: var(--color-surface-3);
+    border-color: #5c3941;
+  }
+  .btn:active {
+    transform: scale(0.975);
   }
   .btn:disabled {
-    opacity: 0.5;
+    opacity: 0.45;
     cursor: not-allowed;
+    transform: none;
   }
 
   .btn-primary {
-    background: var(--color-accent);
-    border-color: var(--color-accent);
-    color: #08130f;
+    background: linear-gradient(180deg, var(--color-accent), var(--color-red-600));
+    border-color: var(--color-red-600);
+    color: #fff;
     font-weight: 600;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.18),
+      0 6px 18px -8px rgba(212, 42, 66, 0.8);
   }
   .btn-primary:hover {
-    background: var(--color-accent-dim);
-    border-color: var(--color-accent-dim);
+    background: linear-gradient(180deg, var(--color-red-400), var(--color-accent));
+    border-color: var(--color-accent);
   }
 
   .btn-ghost {
     background: transparent;
+    border-color: transparent;
+    color: var(--color-text-2);
   }
   .btn-ghost:hover {
-    background: var(--color-ink-3);
+    background: var(--color-surface-2);
+    border-color: var(--color-line);
+    color: var(--color-text);
   }
+
+  .btn-sm {
+    padding: 0.3rem 0.6rem;
+    font-size: 0.78rem;
+    border-radius: 8px;
+  }
+
+  /* ─────────────────────  ПОЛЯ  ───────────────────── */
 
   .input,
   .select,
   .textarea {
     width: 100%;
-    padding: 0.5rem 0.7rem;
-    border-radius: 8px;
-    background: var(--color-ink);
+    padding: 0.55rem 0.75rem;
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--color-bg) 70%, black 10%);
     border: 1px solid var(--color-line);
     color: var(--color-text);
     font-size: 0.9rem;
+    font-family: inherit;
+    transition:
+      border-color 140ms ease-out,
+      background-color 140ms ease-out;
+  }
+  .input::placeholder,
+  .textarea::placeholder {
+    color: color-mix(in srgb, var(--color-muted) 75%, transparent);
+  }
+  .input:hover,
+  .select:hover,
+  .textarea:hover {
+    border-color: var(--color-line-strong);
   }
   .input:focus,
   .select:focus,
   .textarea:focus {
     outline: none;
     border-color: var(--color-accent);
+    background: color-mix(in srgb, var(--color-bg) 85%, var(--color-accent) 4%);
   }
   .textarea {
-    min-height: 90px;
+    min-height: 96px;
     resize: vertical;
+    line-height: 1.55;
+  }
+
+  .select {
+    appearance: none;
+    background-image: linear-gradient(45deg, transparent 50%, var(--color-muted) 50%),
+      linear-gradient(135deg, var(--color-muted) 50%, transparent 50%);
+    background-position:
+      calc(100% - 16px) calc(50% + 1px),
+      calc(100% - 11px) calc(50% + 1px);
+    background-size: 5px 5px, 5px 5px;
+    background-repeat: no-repeat;
+    padding-right: 2rem;
   }
 
   .label {
     display: block;
-    font-size: 0.78rem;
+    font-size: 0.75rem;
+    letter-spacing: 0.01em;
     color: var(--color-muted);
-    margin-bottom: 0.3rem;
+    margin-bottom: 0.35rem;
   }
+
+  input[type="checkbox"] {
+    accent-color: var(--color-accent);
+    width: 15px;
+    height: 15px;
+  }
+
+  input[type="file"] {
+    padding: 0.38rem 0.5rem;
+    font-size: 0.82rem;
+  }
+  input[type="file"]::file-selector-button {
+    margin-right: 0.6rem;
+    padding: 0.25rem 0.6rem;
+    border-radius: 7px;
+    border: 1px solid var(--color-line-strong);
+    background: var(--color-surface-2);
+    color: var(--color-text);
+    font-size: 0.8rem;
+    cursor: pointer;
+  }
+
+  /* ─────────────────────  МЕТКИ  ───────────────────── */
 
   .badge {
     display: inline-flex;
     align-items: center;
-    gap: 0.3rem;
-    padding: 0.15rem 0.55rem;
+    gap: 0.35rem;
+    padding: 0.18rem 0.6rem;
     border-radius: 999px;
     font-size: 0.72rem;
+    letter-spacing: 0.01em;
+    line-height: 1.5;
     border: 1px solid var(--color-line);
-    background: var(--color-ink-3);
-    color: var(--color-muted);
+    background: var(--color-surface-2);
+    color: var(--color-text-2);
     white-space: nowrap;
   }
+
   .badge-accent {
-    background: color-mix(in srgb, var(--color-accent) 15%, transparent);
-    border-color: color-mix(in srgb, var(--color-accent) 45%, transparent);
-    color: var(--color-accent);
+    background: color-mix(in srgb, var(--color-accent) 16%, transparent);
+    border-color: color-mix(in srgb, var(--color-accent) 42%, transparent);
+    color: var(--color-red-400);
   }
-  .badge-warn {
-    background: color-mix(in srgb, var(--color-warn) 14%, transparent);
-    border-color: color-mix(in srgb, var(--color-warn) 40%, transparent);
-    color: var(--color-warn);
+  .badge-gold {
+    background: color-mix(in srgb, var(--color-gold) 14%, transparent);
+    border-color: color-mix(in srgb, var(--color-gold) 38%, transparent);
+    color: var(--color-gold);
   }
+  .badge-jade {
+    background: color-mix(in srgb, var(--color-jade) 14%, transparent);
+    border-color: color-mix(in srgb, var(--color-jade) 38%, transparent);
+    color: var(--color-jade);
+  }
+
+  /* ─────────────────────  ТАБЛИЦЫ  ───────────────────── */
 
   .th {
     text-align: left;
-    font-size: 0.74rem;
+    font-size: 0.7rem;
     text-transform: uppercase;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.07em;
     color: var(--color-muted);
-    font-weight: 500;
-    padding: 0.6rem 0.75rem;
+    font-weight: 600;
+    padding: 0.7rem 0.9rem;
+    white-space: nowrap;
   }
   .td {
-    padding: 0.7rem 0.75rem;
+    padding: 0.75rem 0.9rem;
     font-size: 0.875rem;
     border-top: 1px solid var(--color-line);
+    vertical-align: middle;
+  }
+  .row-hover {
+    transition: background-color 120ms ease-out;
+  }
+  .row-hover:hover {
+    background: color-mix(in srgb, var(--color-accent) 6%, transparent);
+  }
+
+  /* Карточка-ссылка: приподнимается, но не прыгает */
+  .card-link {
+    transition:
+      border-color 140ms ease-out,
+      box-shadow 180ms ease-out,
+      transform 140ms ease-out;
+  }
+  .card-link:hover {
+    border-color: color-mix(in srgb, var(--color-accent) 45%, var(--color-line));
+    box-shadow: var(--shadow-lift);
+    transform: translateY(-1px);
+  }
+  .card-link:active {
+    transform: translateY(0) scale(0.995);
+  }
+
+  .link-accent {
+    color: var(--color-red-400);
+    text-underline-offset: 3px;
+  }
+  .link-accent:hover {
+    text-decoration: underline;
+  }
+
+  /* Сообщения: статус, ошибка, предупреждение */
+  .note {
+    border-radius: 10px;
+    padding: 0.6rem 0.85rem;
+    font-size: 0.875rem;
+    border: 1px solid;
+  }
+  .note-ok {
+    border-color: color-mix(in srgb, var(--color-jade) 45%, transparent);
+    background: color-mix(in srgb, var(--color-jade) 12%, transparent);
+    color: var(--color-jade);
+  }
+  .note-warn {
+    border-color: color-mix(in srgb, var(--color-gold) 45%, transparent);
+    background: color-mix(in srgb, var(--color-gold) 12%, transparent);
+    color: var(--color-gold);
+  }
+  .note-err {
+    border-color: color-mix(in srgb, var(--color-danger) 45%, transparent);
+    background: color-mix(in srgb, var(--color-danger) 12%, transparent);
+    color: var(--color-danger);
+  }
+}
+
+/* ─────────────────────  ДОСТУПНОСТЬ  ───────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .btn:active,
+  .card-link:hover {
+    transform: none !important;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .chrome {
+    background: var(--color-surface);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}
+
+@media (prefers-contrast: more) {
+  .panel,
+  .btn,
+  .input,
+  .select,
+  .textarea {
+    border-color: var(--color-line-strong);
+  }
+  .badge {
+    color: var(--color-text);
   }
 }

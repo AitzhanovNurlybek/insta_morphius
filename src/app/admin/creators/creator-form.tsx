@@ -20,7 +20,7 @@ export function CreatorForm({
   return (
     <form action={action} className="space-y-6">
       <section className="panel space-y-4 p-5">
-        <h2 className="text-sm font-medium text-[var(--color-muted)]">Кто это</h2>
+        <h2 className="t-section">Кто это</h2>
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label="ФИО *">
             <input className="input" name="full_name" defaultValue={creator?.full_name} required />
@@ -51,7 +51,7 @@ export function CreatorForm({
 
       <section className="panel space-y-4 p-5">
         <div className="flex items-baseline justify-between">
-          <h2 className="text-sm font-medium text-[var(--color-muted)]">Статистика</h2>
+          <h2 className="t-section">Статистика</h2>
           <span className="badge">Ручной ввод</span>
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
@@ -111,7 +111,7 @@ export function CreatorForm({
       </section>
 
       <section className="panel space-y-4 p-5">
-        <h2 className="text-sm font-medium text-[var(--color-muted)]">Деньги и оценка агентства</h2>
+        <h2 className="t-section">Деньги и оценка агентства</h2>
         <div className="grid gap-4 sm:grid-cols-3">
           <Field label="Стоимость от, ₸">
             <input
@@ -145,7 +145,7 @@ export function CreatorForm({
       </section>
 
       <section className="panel space-y-4 p-5">
-        <h2 className="text-sm font-medium text-[var(--color-muted)]">Портфолио и контакты</h2>
+        <h2 className="t-section">Портфолио и контакты</h2>
         <Field
           label="Примеры работ"
           hint="По одной ссылке в строке. Можно «Название | ссылка»"

@@ -85,7 +85,7 @@ export default async function BusinessCampaignPage({
 
       <section className="panel mb-5 p-5">
         <div className="mb-3 flex items-baseline justify-between gap-3">
-          <h2 className="text-sm font-medium text-[var(--color-muted)]">Бриф</h2>
+          <h2 className="t-section">Бриф</h2>
           {campaign.status === "new_request" && (
             <Link
               href={`/business/campaigns/${campaign.id}/edit`}
@@ -113,7 +113,7 @@ export default async function BusinessCampaignPage({
       </section>
 
       <section className="panel mb-5 p-5">
-        <h2 className="mb-3 text-sm font-medium text-[var(--color-muted)]">
+        <h2 className="t-section mb-3">
           Предложенные creators
         </h2>
         {tasks.length === 0 ? (
@@ -128,7 +128,7 @@ export default async function BusinessCampaignPage({
               return (
                 <div
                   key={t.id}
-                  className="rounded-lg border border-[var(--color-line)] bg-[var(--color-ink)] p-4"
+                  className="rounded-lg border border-[var(--color-line)] bg-[var(--color-bg)] p-4"
                 >
                   <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
                     <div className="font-medium">
@@ -178,7 +178,7 @@ export default async function BusinessCampaignPage({
 
       {(campaign.report_text || campaign.deliverables.length > 0 || campaign.report_file_url) && (
         <section className="panel mb-5 p-5">
-          <h2 className="mb-3 text-sm font-medium text-[var(--color-muted)]">Отчёт</h2>
+          <h2 className="t-section mb-3">Отчёт</h2>
           {campaign.report_text && (
             <p className="mb-4 whitespace-pre-wrap text-sm">{campaign.report_text}</p>
           )}
@@ -212,7 +212,7 @@ export default async function BusinessCampaignPage({
       )}
 
       <section className="panel p-5">
-        <h2 className="mb-3 text-sm font-medium text-[var(--color-muted)]">История</h2>
+        <h2 className="t-section mb-3">История</h2>
         {log.length === 0 ? (
           <Empty text="Пока пусто" />
         ) : (

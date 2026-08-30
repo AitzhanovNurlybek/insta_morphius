@@ -50,7 +50,7 @@ export function CheckboxGroup({
       {options.map((option) => (
         <label
           key={option}
-          className="flex cursor-pointer items-center gap-2 rounded-lg border border-[var(--color-line)] bg-[var(--color-ink)] px-3 py-1.5 text-sm"
+          className="flex cursor-pointer items-center gap-2 rounded-lg border border-[var(--color-line)] bg-[var(--color-bg)] px-3 py-1.5 text-sm"
         >
           <input
             type="checkbox"

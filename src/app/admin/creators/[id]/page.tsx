@@ -53,12 +53,12 @@ export default async function CreatorPage({
       />
 
       {saved && (
-        <p className="mb-4 rounded-lg border border-[var(--color-accent)] px-3 py-2 text-sm text-[var(--color-accent)]">
+        <p className="note note-ok mb-4">
           Сохранено
         </p>
       )}
       {error && (
-        <p className="mb-4 rounded-lg border border-[var(--color-danger)] px-3 py-2 text-sm text-[var(--color-danger)]">
+        <p className="note note-err mb-4">
           {error}
         </p>
       )}
@@ -84,7 +84,7 @@ export default async function CreatorPage({
       </div>
 
       <div className="panel mb-6 p-5">
-        <h2 className="mb-3 text-sm font-medium text-[var(--color-muted)]">
+        <h2 className="t-section mb-3">
           Подключение Instagram
         </h2>
 
@@ -107,7 +107,7 @@ export default async function CreatorPage({
               начнут обновляться сами. До одобрения приложения в Meta ссылка работает
               только для аккаунтов-тестировщиков.
             </p>
-            <code className="block overflow-x-auto rounded-lg border border-[var(--color-line)] bg-[var(--color-ink)] px-3 py-2 text-xs">
+            <code className="block overflow-x-auto rounded-lg border border-[var(--color-line)] bg-[var(--color-bg)] px-3 py-2 text-xs">
               {connectUrl}
             </code>
             <div className="flex flex-wrap gap-2">
@@ -124,7 +124,7 @@ export default async function CreatorPage({
         )}
 
         {creator.instagram_deletion_requested_at && (
-          <p className="mt-3 text-xs text-[var(--color-warn)]">
+          <p className="mt-3 text-xs text-[var(--color-gold)]">
             Креатор запрашивал удаление данных Instagram{" "}
             {dateTime(creator.instagram_deletion_requested_at)}
           </p>
@@ -132,7 +132,7 @@ export default async function CreatorPage({
       </div>
 
       <div className="panel mb-6 p-5">
-        <h2 className="mb-3 text-sm font-medium text-[var(--color-muted)]">Портфолио</h2>
+        <h2 className="t-section mb-3">Портфолио</h2>
         {creator.portfolio.length > 0 ? (
           <ul className="mb-4 space-y-1 text-sm">
             {creator.portfolio.map((p) => (
@@ -175,7 +175,7 @@ export default async function CreatorPage({
       </div>
 
       <div className="panel mb-6 p-5">
-        <h2 className="mb-3 text-sm font-medium text-[var(--color-muted)]">История кампаний</h2>
+        <h2 className="t-section mb-3">История кампаний</h2>
         {tasks.length === 0 ? (
           <p className="text-sm text-[var(--color-muted)]">Пока не участвовал в кампаниях.</p>
         ) : (
@@ -206,7 +206,7 @@ export default async function CreatorPage({
         )}
       </div>
 
-      <h2 className="mb-3 text-sm font-medium text-[var(--color-muted)]">Редактировать профиль</h2>
+      <h2 className="t-section mb-3">Редактировать профиль</h2>
       <CreatorForm creator={creator} action={updateCreator.bind(null, creator.id)} />
     </>
   );

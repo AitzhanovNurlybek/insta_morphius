@@ -48,14 +48,16 @@ export default async function CreatorsPage({
         }
       />
 
-      <form className="panel mb-5 grid gap-3 p-4 sm:grid-cols-2 lg:grid-cols-6">
+      {/* 12 колонок вместо 6: полю «подписчиков от» нужна своя ширина,
+          иначе плейсхолдер обрезается на середине слова */}
+      <form className="panel mb-5 grid grid-cols-2 gap-3 p-4 lg:grid-cols-12">
         <input
-          className="input lg:col-span-2"
+          className="input col-span-2 lg:col-span-3"
           name="q"
           placeholder="Имя или никнейм"
           defaultValue={f.q ?? ""}
         />
-        <select className="select" name="city" defaultValue={f.city ?? ""}>
+        <select className="select lg:col-span-2" name="city" defaultValue={f.city ?? ""}>
           <option value="">Все города</option>
           {CITIES.map((c) => (
             <option key={c} value={c}>
@@ -63,7 +65,7 @@ export default async function CreatorsPage({
             </option>
           ))}
         </select>
-        <select className="select" name="niche" defaultValue={f.niche ?? ""}>
+        <select className="select lg:col-span-2" name="niche" defaultValue={f.niche ?? ""}>
           <option value="">Все ниши</option>
           {NICHES.map((n) => (
             <option key={n} value={n}>
@@ -71,7 +73,7 @@ export default async function CreatorsPage({
             </option>
           ))}
         </select>
-        <select className="select" name="tier" defaultValue={f.tier ?? ""}>
+        <select className="select lg:col-span-2" name="tier" defaultValue={f.tier ?? ""}>
           <option value="">Любой тир</option>
           {Object.entries(TIER_LABEL).map(([value, label]) => (
             <option key={value} value={value}>
@@ -79,18 +81,16 @@ export default async function CreatorsPage({
             </option>
           ))}
         </select>
-        <div className="flex gap-2">
-          <input
-            className="input"
-            name="min"
-            inputMode="numeric"
-            placeholder="Подписчиков от"
-            defaultValue={f.min ?? ""}
-          />
-          <button className="btn" type="submit">
-            Найти
-          </button>
-        </div>
+        <input
+          className="input lg:col-span-2"
+          name="min"
+          inputMode="numeric"
+          placeholder="Подписчиков от"
+          defaultValue={f.min ?? ""}
+        />
+        <button className="btn col-span-2 lg:col-span-1" type="submit">
+          Найти
+        </button>
       </form>
 
       {creators.length === 0 ? (
@@ -112,7 +112,7 @@ export default async function CreatorsPage({
             </thead>
             <tbody>
               {creators.map((c) => (
-                <tr key={c.id} className="hover:bg-[var(--color-ink-3)]">
+                <tr key={c.id} className="hover:bg-[var(--color-surface-2)]">
                   <td className="td">
                     <Link
                       href={`/admin/creators/${c.id}`}

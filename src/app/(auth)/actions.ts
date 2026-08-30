@@ -2,7 +2,23 @@
 
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
+import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
+import { DEMO_COOKIE, isDemo } from "@/lib/demo/mode";
+
+/** Вход в демо-режиме: роль выбирается кнопкой, пароль не нужен. */
+export async function demoSignIn(role: "admin" | "business") {
+  const cookieStore = await cookies();
+  cookieStore.set(DEMO_COOKIE, role, {
+    httpOnly: true,
+    sameSite: "lax",
+    path: "/",
+    maxAge: 60 * 60 * 24,
+  });
+
+  revalidatePath("/", "layout");
+  redirect(role === "admin" ? "/admin" : "/business");
+}
 
 export async function signIn(formData: FormData) {
   const email = String(formData.get("email") ?? "").trim();
@@ -46,8 +62,14 @@ export async function signUp(formData: FormData) {
 }
 
 export async function signOut() {
-  const supabase = await createClient();
-  await supabase.auth.signOut();
+  if (isDemo()) {
+    const cookieStore = await cookies();
+    cookieStore.delete(DEMO_COOKIE);
+  } else {
+    const supabase = await createClient();
+    await supabase.auth.signOut();
+  }
+
   revalidatePath("/", "layout");
   redirect("/login");
 }

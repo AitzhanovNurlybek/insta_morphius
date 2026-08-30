@@ -59,7 +59,7 @@ export default function DataDeletionPage() {
       <H2>Статус запроса</H2>
       <p>
         Если у вас есть код подтверждения, откройте страницу{" "}
-        <code className="rounded bg-[var(--color-ink-3)] px-1.5 py-0.5">/data-deletion/КОД</code>{" "}
+        <code className="rounded bg-[var(--color-surface-2)] px-1.5 py-0.5">/data-deletion/КОД</code>{" "}
         — там виден статус.
       </p>
 
@@ -80,7 +80,7 @@ export default function DataDeletionPage() {
         all Instagram-derived metrics; on request, the whole profile. Retained: anonymized
         records of completed campaigns and accounting documents required by law. If you have
         a confirmation code, check its status at{" "}
-        <code className="rounded bg-[var(--color-ink-3)] px-1.5 py-0.5">/data-deletion/CODE</code>.
+        <code className="rounded bg-[var(--color-surface-2)] px-1.5 py-0.5">/data-deletion/CODE</code>.
       </p>
 
       <p>

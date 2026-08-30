@@ -57,7 +57,7 @@ export default async function CampaignsPage({
             </thead>
             <tbody>
               {rows.map((c) => (
-                <tr key={c.id} className="hover:bg-[var(--color-ink-3)]">
+                <tr key={c.id} className="hover:bg-[var(--color-surface-2)]">
                   <td className="td">
                     <Link
                       href={`/admin/campaigns/${c.id}`}

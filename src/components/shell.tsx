@@ -1,9 +1,16 @@
-import Link from "next/link";
 import { signOut } from "@/app/(auth)/actions";
+import { NavLinks, type NavItem } from "@/components/nav-links";
 import { CAMPAIGN_STATUS_LABEL, TASK_STATUS_LABEL, TIER_LABEL } from "@/lib/constants";
+import { isDemo } from "@/lib/demo/mode";
 import type { CampaignStatus, CreatorTier, TaskStatus } from "@/lib/types";
 
-type NavItem = { href: string; label: string };
+export function Logo({ className = "" }: { className?: string }) {
+  return (
+    <span className={`font-semibold tracking-tight ${className}`}>
+      Creator<span className="text-[var(--color-accent)]">Platform</span>
+    </span>
+  );
+}
 
 export function Shell({
   nav,
@@ -16,80 +23,150 @@ export function Shell({
 }) {
   return (
     <div className="min-h-screen">
-      <header className="border-b border-[var(--color-line)] bg-[var(--color-ink-2)]">
+      {isDemo() && <DemoBanner />}
+
+      <header className="chrome sticky top-0 z-30">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-6 gap-y-3 px-4 py-3">
-          <div className="mr-2">
-            <div className="text-sm font-semibold tracking-tight">
-              Creator<span className="text-[var(--color-accent)]">Platform</span>
-            </div>
+          <div className="mr-1">
+            <Logo className="text-sm" />
             <div className="text-xs text-[var(--color-muted)]">{subtitle}</div>
           </div>
-          <nav className="flex flex-wrap gap-1">
-            {nav.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="rounded-lg px-3 py-1.5 text-sm text-[var(--color-muted)] hover:bg-[var(--color-ink-3)] hover:text-[var(--color-text)]"
-              >
-                {item.label}
-              </Link>
-            ))}
-          </nav>
+
+          <NavLinks items={nav} />
+
           <form action={signOut} className="ml-auto">
-            <button className="btn btn-ghost" type="submit">
+            <button className="btn btn-ghost btn-sm" type="submit">
               Выйти
             </button>
           </form>
         </div>
       </header>
-      <main className="mx-auto max-w-6xl px-4 py-6">{children}</main>
+
+      <main className="mx-auto max-w-6xl px-4 pt-6 pb-16">{children}</main>
+    </div>
+  );
+}
+
+function DemoBanner() {
+  return (
+    <div className="border-b border-[color-mix(in_srgb,var(--color-gold)_35%,transparent)] bg-[color-mix(in_srgb,var(--color-gold)_10%,transparent)]">
+      <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-2 gap-y-1 px-4 py-1.5 text-xs text-[var(--color-gold)]">
+        <strong className="font-semibold">Демо-режим.</strong>
+        <span>
+          Данные вымышленные и живут в памяти: правки видны до перезапуска сервера.
+          Подключите Supabase — и всё то же самое поедет на настоящей базе.
+        </span>
+      </div>
     </div>
   );
 }
 
 export function PageTitle({
   title,
+  hint,
   action,
 }: {
   title: string;
+  hint?: string;
   action?: React.ReactNode;
 }) {
   return (
-    <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-      <h1 className="text-xl font-semibold">{title}</h1>
+    <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
+      <div>
+        <h1 className="t-display">{title}</h1>
+        {hint && <p className="mt-1 text-sm text-[var(--color-muted)]">{hint}</p>}
+      </div>
       {action}
     </div>
   );
 }
 
-export function StatusBadge({ status }: { status: CampaignStatus }) {
-  const done = status === "completed";
-  const fresh = status === "new_request";
+export function SectionTitle({
+  children,
+  aside,
+}: {
+  children: React.ReactNode;
+  aside?: React.ReactNode;
+}) {
   return (
-    <span className={`badge ${done ? "badge-accent" : fresh ? "badge-warn" : ""}`}>
+    <div className="mb-3 flex flex-wrap items-baseline justify-between gap-3">
+      <h2 className="t-section">{children}</h2>
+      {aside}
+    </div>
+  );
+}
+
+/* ── Статусы ──
+   Цветом отмечаем только то, что требует действия (золото) и то, что
+   закрыто (нефрит). Середина воронки — нейтральная: если подсветить всё,
+   не подсвечено ничего. */
+
+const CAMPAIGN_TONE: Partial<Record<CampaignStatus, string>> = {
+  new_request: "badge-gold",
+  published: "badge-accent",
+  report_sent: "badge-accent",
+  completed: "badge-jade",
+};
+
+export function StatusBadge({ status }: { status: CampaignStatus }) {
+  return (
+    <span className={`badge ${CAMPAIGN_TONE[status] ?? ""}`}>
       {CAMPAIGN_STATUS_LABEL[status]}
     </span>
   );
 }
 
+const TASK_TONE: Partial<Record<TaskStatus, string>> = {
+  review: "badge-gold",
+  published: "badge-jade",
+};
+
 export function TaskBadge({ status }: { status: TaskStatus }) {
   return (
-    <span className={`badge ${status === "published" ? "badge-accent" : ""}`}>
-      {TASK_STATUS_LABEL[status]}
-    </span>
+    <span className={`badge ${TASK_TONE[status] ?? ""}`}>{TASK_STATUS_LABEL[status]}</span>
   );
 }
 
 export function TierBadge({ tier }: { tier: CreatorTier }) {
   return (
-    <span className={`badge ${tier === "top" ? "badge-accent" : ""}`}>
-      {TIER_LABEL[tier]}
-    </span>
+    <span className={`badge ${tier === "top" ? "badge-accent" : ""}`}>{TIER_LABEL[tier]}</span>
   );
 }
 
-export function Empty({ text }: { text: string }) {
+export function Empty({ text, action }: { text: string; action?: React.ReactNode }) {
   return (
-    <div className="panel p-8 text-center text-sm text-[var(--color-muted)]">{text}</div>
+    <div className="panel px-6 py-12 text-center">
+      <p className="text-sm text-[var(--color-muted)]">{text}</p>
+      {action && <div className="mt-4 flex justify-center">{action}</div>}
+    </div>
+  );
+}
+
+export function Stat({
+  label,
+  value,
+  note,
+  tone,
+}: {
+  label: string;
+  value: string;
+  note?: string;
+  tone?: "accent" | "gold";
+}) {
+  const color =
+    tone === "accent"
+      ? "text-[var(--color-red-400)]"
+      : tone === "gold"
+        ? "text-[var(--color-gold)]"
+        : "";
+
+  return (
+    <div className="panel p-4">
+      <div className="text-xs text-[var(--color-muted)]">{label}</div>
+      <div className={`t-num mt-1.5 ${color}`}>{value}</div>
+      {note && note !== "—" && (
+        <div className="mt-1 text-xs text-[var(--color-muted)]">{note}</div>
+      )}
+    </div>
   );
 }
