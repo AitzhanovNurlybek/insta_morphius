@@ -55,6 +55,9 @@ await browser.setCookie({ name: "demo_role", value: "admin", domain: "localhost"
 
 // 1. Смена статуса кампании пишется в журнал
 await page.goto(`${BASE}/admin/campaigns/cm-5`, { waitUntil: "networkidle2" });
+// Разделы свёрнуты по умолчанию — для проверки раскрываем всё
+const openAll = () => page.$$eval("details", (ds) => ds.forEach((d) => (d.open = true)));
+await openAll();
 const before = await page.$$eval("aside li", (els) => els.length);
 // Берём любой статус, отличный от текущего: повторная установка того же
 // статуса журнал не пишет — и это правильно, но тест тогда врёт
@@ -74,19 +77,20 @@ check("запись попала в журнал", after === before + 1, `был
 
 // 2. Подбор креатора в кампанию
 const attachedBefore = await page.$$eval('form input[name="task"]', (e) => e.length);
+await openAll();
 await page.click('input[name="creator_ids"]');
 await Promise.all([
   page.waitForNavigation({ waitUntil: "networkidle2" }),
-  page.click("xpath=//button[contains(., 'Отправить предложение')]"),
+  page.click("xpath=//button[contains(., 'Добавить в кампанию')]"),
 ]);
 const attachedAfter = await page.$$eval('form input[name="task"]', (e) => e.length);
 check("креатор прикрепился", attachedAfter === attachedBefore + 1, `${attachedBefore} → ${attachedAfter}`);
 
 // 3. Фильтр базы креаторов
 await page.goto(`${BASE}/admin/creators?niche=Food`, { waitUntil: "networkidle2" });
-const foodRows = await page.$$eval("tbody tr", (r) => r.length);
+const foodRows = await page.$$eval("[data-creator]", (r) => r.length);
 await page.goto(`${BASE}/admin/creators`, { waitUntil: "networkidle2" });
-const allRows = await page.$$eval("tbody tr", (r) => r.length);
+const allRows = await page.$$eval("[data-creator]", (r) => r.length);
 check("фильтр по нише сужает выдачу", foodRows > 0 && foodRows < allRows, `Food ${foodRows} из ${allRows}`);
 
 // 4. Поле фильтра не обрезает плейсхолдер
@@ -103,6 +107,17 @@ await Promise.all([
   page.click("xpath=//button[contains(., 'Сохранить')]"),
 ]);
 check("новый креатор сохранён", (await page.$eval("body", (e) => e.innerText)).includes("test.creator"));
+
+// 5b. Подсказка «как это работает» закрывается и не возвращается
+await page.goto(`${BASE}/admin`, { waitUntil: "networkidle2" });
+const hintShown = (await page.$eval("body", (e) => e.innerText)).includes("КАК ЭТО РАБОТАЕТ");
+await page.click("xpath=//button[contains(., 'Понятно')]");
+await new Promise((r) => setTimeout(r, 200));
+const hintGone = !(await page.$eval("body", (e) => e.innerText)).includes("КАК ЭТО РАБОТАЕТ");
+await page.reload({ waitUntil: "networkidle2" });
+const stillGone = !(await page.$eval("body", (e) => e.innerText)).includes("КАК ЭТО РАБОТАЕТ");
+check("подсказка показана новому пользователю", hintShown);
+check("подсказка закрывается и не возвращается", hintGone && stillGone);
 
 // 6. Клиент видит только публичное — тира и заметок в его кабинете нет
 await browser.setCookie({ name: "demo_role", value: "business", domain: "localhost", path: "/" });

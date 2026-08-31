@@ -120,7 +120,10 @@ const DEFAULTS: Record<string, () => Row> = {
 type RelDef = { table: string; fk: string; kind: "one" | "many" };
 
 const RELATIONS: Record<string, Record<string, RelDef>> = {
-  campaigns: { businesses: { table: "businesses", fk: "business_id", kind: "one" } },
+  campaigns: {
+    businesses: { table: "businesses", fk: "business_id", kind: "one" },
+    campaign_creators: { table: "campaign_creators", fk: "campaign_id", kind: "many" },
+  },
   campaign_creators: {
     creators: { table: "creators", fk: "creator_id", kind: "one" },
     campaigns: { table: "campaigns", fk: "campaign_id", kind: "one" },

@@ -52,10 +52,7 @@ function DemoBanner() {
     <div className="border-b border-[color-mix(in_srgb,var(--color-gold)_35%,transparent)] bg-[color-mix(in_srgb,var(--color-gold)_10%,transparent)]">
       <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-2 gap-y-1 px-4 py-1.5 text-xs text-[var(--color-gold)]">
         <strong className="font-semibold">Демо-режим.</strong>
-        <span>
-          Данные вымышленные и живут в памяти: правки видны до перезапуска сервера.
-          Подключите Supabase — и всё то же самое поедет на настоящей базе.
-        </span>
+        <span>Данные вымышленные, правки живут до перезапуска сервера.</span>
       </div>
     </div>
   );

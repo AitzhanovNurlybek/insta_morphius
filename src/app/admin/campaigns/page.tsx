@@ -1,83 +1,102 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { PageTitle, StatusBadge, Empty } from "@/components/shell";
-import { CAMPAIGN_FLOW, CAMPAIGN_STATUS_LABEL } from "@/lib/constants";
+import { PageTitle, Empty } from "@/components/shell";
+import { Icon } from "@/components/icons";
+import { PHASES, phaseOf } from "@/lib/funnel";
+import { CAMPAIGN_STATUS_LABEL } from "@/lib/constants";
 import { date, money } from "@/lib/format";
 import type { Campaign } from "@/lib/types";
 
-export default async function CampaignsPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ status?: string }>;
-}) {
-  const { status } = await searchParams;
+type Row = Campaign & {
+  businesses: { name: string } | null;
+  campaign_creators: { id: string }[];
+};
+
+/**
+ * Доска по фазам вместо плоского списка. Список показывает, что есть;
+ * доска показывает, как устроена работа — новому человеку это объясняет
+ * процесс без единого слова инструкции.
+ */
+export default async function CampaignsPage() {
   const supabase = await createClient();
 
-  let query = supabase
+  const { data } = await supabase
     .from("campaigns")
-    .select("*, businesses(name)")
-    .order("created_at", { ascending: false });
-  if (status) query = query.eq("status", status);
+    .select("*, businesses(name), campaign_creators(id)")
+    .order("updated_at", { ascending: false });
 
-  const { data } = await query;
-  const rows = (data ?? []) as (Campaign & { businesses: { name: string } | null })[];
+  const rows = (data ?? []) as Row[];
 
   return (
     <>
-      <PageTitle title="Кампании" />
-
-      <div className="mb-5 flex flex-wrap gap-2">
-        <Link href="/admin/campaigns" className={`badge ${!status ? "badge-accent" : ""}`}>
-          Все
-        </Link>
-        {CAMPAIGN_FLOW.map((s) => (
-          <Link
-            key={s}
-            href={`/admin/campaigns?status=${s}`}
-            className={`badge ${status === s ? "badge-accent" : ""}`}
-          >
-            {CAMPAIGN_STATUS_LABEL[s]}
-          </Link>
-        ))}
-      </div>
+      <PageTitle
+        title="Кампании"
+        hint="Слева направо — путь кампании от заявки до отчёта"
+      />
 
       {rows.length === 0 ? (
-        <Empty text="Кампаний с таким статусом нет." />
+        <Empty text="Кампаний пока нет. Они появятся, когда клиент оставит бриф." />
       ) : (
-        <div className="panel overflow-x-auto">
-          <table className="w-full min-w-[720px]">
-            <thead>
-              <tr>
-                <th className="th">Кампания</th>
-                <th className="th">Бизнес</th>
-                <th className="th">Бюджет</th>
-                <th className="th">Сроки</th>
-                <th className="th">Статус</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((c) => (
-                <tr key={c.id} className="hover:bg-[var(--color-surface-2)]">
-                  <td className="td">
+        <div className="grid gap-4 lg:grid-cols-4">
+          {PHASES.map((phase, index) => {
+            const items = rows.filter((c) => phaseOf(c.status) === index);
+
+            return (
+              <section key={phase.key} className="min-w-0">
+                <header className="mb-3 flex items-center gap-2">
+                  <span className="flex h-7 w-7 items-center justify-center rounded-lg border border-[var(--color-line)] bg-[var(--color-surface-2)] text-[var(--color-text-2)]">
+                    <Icon name={phase.icon} size={15} />
+                  </span>
+                  <h2 className="text-sm font-medium">{phase.label}</h2>
+                  <span className="tabular ml-auto text-xs text-[var(--color-muted)]">
+                    {items.length}
+                  </span>
+                </header>
+
+                <div className="space-y-2.5">
+                  {items.length === 0 && (
+                    <div className="rounded-xl border border-dashed border-[var(--color-line)] px-3 py-6 text-center text-xs text-[var(--color-muted)]">
+                      пусто
+                    </div>
+                  )}
+
+                  {items.map((c) => (
                     <Link
+                      key={c.id}
                       href={`/admin/campaigns/${c.id}`}
-                      className="font-medium hover:text-[var(--color-accent)]"
+                      className="panel card-link block p-3.5"
                     >
-                      {c.title}
+                      <div className="mb-1.5 text-sm leading-snug font-medium">{c.title}</div>
+                      <div className="mb-2.5 text-xs text-[var(--color-muted)]">
+                        {c.businesses?.name ?? "—"}
+                      </div>
+
+                      <div className="mb-2.5 text-xs text-[var(--color-red-400)]">
+                        {CAMPAIGN_STATUS_LABEL[c.status]}
+                      </div>
+
+                      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-[var(--color-muted)]">
+                        <span className="flex items-center gap-1">
+                          <Icon name="users" size={12} />
+                          {(c.campaign_creators ?? []).length}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Icon name="money" size={12} />
+                          {money(c.budget)}
+                        </span>
+                        {c.ends_on && (
+                          <span className="flex items-center gap-1">
+                            <Icon name="clock" size={12} />
+                            {date(c.ends_on)}
+                          </span>
+                        )}
+                      </div>
                     </Link>
-                  </td>
-                  <td className="td text-[var(--color-muted)]">{c.businesses?.name ?? "—"}</td>
-                  <td className="td whitespace-nowrap">{money(c.budget)}</td>
-                  <td className="td whitespace-nowrap text-[var(--color-muted)]">
-                    {date(c.starts_on)} — {date(c.ends_on)}
-                  </td>
-                  <td className="td">
-                    <StatusBadge status={c.status} />
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                  ))}
+                </div>
+              </section>
+            );
+          })}
         </div>
       )}
     </>

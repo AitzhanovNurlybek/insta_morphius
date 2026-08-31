@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { PageTitle, TierBadge, Empty } from "@/components/shell";
+import { PageTitle, Empty } from "@/components/shell";
+import { CreatorCard } from "@/components/creator-card";
+import { Icon } from "@/components/icons";
 import { CITIES, NICHES, TIER_LABEL } from "@/lib/constants";
-import { compact, priceRange } from "@/lib/format";
 import type { Creator } from "@/lib/types";
 
 type Filters = {
@@ -36,27 +37,35 @@ export default async function CreatorsPage({
 
   const { data } = await query;
   const creators = (data ?? []) as Creator[];
+  const filtered = Boolean(q || f.city || f.niche || f.tier || f.min);
 
   return (
     <>
       <PageTitle
         title="База creators"
+        hint="Все, с кем агентство работает. Отсюда идёт подбор под кампанию"
         action={
           <Link href="/admin/creators/new" className="btn btn-primary">
-            + Добавить creator
+            <Icon name="plus" size={15} />
+            Добавить creator
           </Link>
         }
       />
 
-      {/* 12 колонок вместо 6: полю «подписчиков от» нужна своя ширина,
-          иначе плейсхолдер обрезается на середине слова */}
       <form className="panel mb-5 grid grid-cols-2 gap-3 p-4 lg:grid-cols-12">
-        <input
-          className="input col-span-2 lg:col-span-3"
-          name="q"
-          placeholder="Имя или никнейм"
-          defaultValue={f.q ?? ""}
-        />
+        <div className="relative col-span-2 lg:col-span-3">
+          <Icon
+            name="search"
+            size={15}
+            className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-[var(--color-muted)]"
+          />
+          <input
+            className="input pl-9"
+            name="q"
+            placeholder="Имя или никнейм"
+            defaultValue={f.q ?? ""}
+          />
+        </div>
         <select className="select lg:col-span-2" name="city" defaultValue={f.city ?? ""}>
           <option value="">Все города</option>
           {CITIES.map((c) => (
@@ -93,65 +102,52 @@ export default async function CreatorsPage({
         </button>
       </form>
 
+      <div className="mb-3 flex items-center justify-between text-sm text-[var(--color-muted)]">
+        <span>
+          {filtered ? "Подходят" : "Всего"}: <span className="tabular">{creators.length}</span>
+        </span>
+        {filtered && (
+          <Link href="/admin/creators" className="link-accent">
+            Сбросить фильтры
+          </Link>
+        )}
+      </div>
+
       {creators.length === 0 ? (
-        <Empty text="Никого не нашли. Сбросьте фильтры или добавьте первого creator'а." />
+        <Empty
+          text="Под фильтр никто не подходит."
+          action={
+            <Link href="/admin/creators" className="btn">
+              Сбросить фильтры
+            </Link>
+          }
+        />
       ) : (
-        <div className="panel overflow-x-auto">
-          <table className="w-full min-w-[860px]">
-            <thead>
-              <tr>
-                <th className="th">Creator</th>
-                <th className="th">Ниши</th>
-                <th className="th">IG</th>
-                <th className="th">TikTok</th>
-                <th className="th">ER</th>
-                <th className="th">Reels</th>
-                <th className="th">Цена</th>
-                <th className="th">Тир</th>
-              </tr>
-            </thead>
-            <tbody>
-              {creators.map((c) => (
-                <tr key={c.id} className="hover:bg-[var(--color-surface-2)]">
-                  <td className="td">
-                    <Link
-                      href={`/admin/creators/${c.id}`}
-                      className="font-medium hover:text-[var(--color-accent)]"
-                    >
-                      {c.nickname ?? c.full_name}
-                    </Link>
-                    <div className="text-xs text-[var(--color-muted)]">
-                      {c.city}
-                      {c.status === "inactive" && " · неактивен"}
-                    </div>
-                  </td>
-                  <td className="td">
-                    <div className="flex flex-wrap gap-1">
-                      {c.niches.map((n) => (
-                        <span key={n} className="badge">
-                          {n}
-                        </span>
-                      ))}
-                    </div>
-                  </td>
-                  <td className="td">{compact(c.ig_followers)}</td>
-                  <td className="td">{compact(c.tt_followers)}</td>
-                  <td className="td">{c.engagement_rate ? `${c.engagement_rate}%` : "—"}</td>
-                  <td className="td">{compact(c.avg_reels_views)}</td>
-                  <td className="td whitespace-nowrap text-xs">
-                    {priceRange(c.price_min, c.price_max)}
-                  </td>
-                  <td className="td">
-                    <TierBadge tier={c.tier} />
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {creators.map((c) => (
+            <div key={c.id} data-creator>
+              <CreatorCard
+                href={`/admin/creators/${c.id}`}
+                creator={{
+                  id: c.id,
+                  name: c.nickname ?? c.full_name,
+                  city: c.city,
+                  niches: c.niches,
+                  ig_followers: c.ig_followers,
+                  tt_followers: c.tt_followers,
+                  engagement_rate: c.engagement_rate,
+                  avg_reels_views: c.avg_reels_views,
+                  price_min: c.price_min,
+                  price_max: c.price_max,
+                  tier: c.tier,
+                  inactive: c.status === "inactive",
+                  verified: c.data_source === "api",
+                }}
+              />
+            </div>
+          ))}
         </div>
       )}
-
-      <p className="mt-3 text-xs text-[var(--color-muted)]">Всего: {creators.length}</p>
     </>
   );
 }

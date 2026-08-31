@@ -2,10 +2,10 @@ import { requireBusiness } from "@/lib/auth";
 import { Shell } from "@/components/shell";
 
 const NAV = [
-  { href: "/business", label: "Мои кампании" },
-  { href: "/business/campaigns/new", label: "Создать бриф" },
-  { href: "/business/creators", label: "Витрина creators" },
-  { href: "/business/profile", label: "Компания" },
+  { href: "/business", label: "Мои кампании", icon: "board" },
+  { href: "/business/campaigns/new", label: "Создать бриф", icon: "plus" },
+  { href: "/business/creators", label: "Витрина creators", icon: "users" },
+  { href: "/business/profile", label: "Компания", icon: "building" },
 ];
 
 export default async function BusinessLayout({

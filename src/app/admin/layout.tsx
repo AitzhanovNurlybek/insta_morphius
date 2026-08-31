@@ -2,11 +2,11 @@ import { requireAdmin } from "@/lib/auth";
 import { Shell } from "@/components/shell";
 
 const NAV = [
-  { href: "/admin", label: "Дашборд" },
-  { href: "/admin/creators", label: "База creators" },
-  { href: "/admin/briefs", label: "Заявки" },
-  { href: "/admin/campaigns", label: "Кампании" },
-  { href: "/admin/businesses", label: "Бизнесы" },
+  { href: "/admin", label: "Дашборд", icon: "home" },
+  { href: "/admin/creators", label: "База creators", icon: "users" },
+  { href: "/admin/briefs", label: "Заявки", icon: "inbox" },
+  { href: "/admin/campaigns", label: "Кампании", icon: "board" },
+  { href: "/admin/businesses", label: "Бизнесы", icon: "building" },
 ];
 
 export default async function AdminLayout({
