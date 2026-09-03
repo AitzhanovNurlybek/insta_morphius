@@ -4,7 +4,7 @@ import { Shell } from "@/components/shell";
 const NAV = [
   { href: "/business", label: "Мои кампании", icon: "board" },
   { href: "/business/campaigns/new", label: "Создать бриф", icon: "plus" },
-  { href: "/business/creators", label: "Витрина creators", icon: "users" },
+  { href: "/business/creators", label: "Каталог", icon: "users" },
   { href: "/business/profile", label: "Компания", icon: "building" },
 ];
 

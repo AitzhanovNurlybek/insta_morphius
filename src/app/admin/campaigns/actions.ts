@@ -140,4 +140,6 @@ export async function saveReport(campaignId: string, formData: FormData) {
     .eq("id", campaignId);
 
   refresh(campaignId);
+  // Отчёт — длинный текст, человеку нужно подтверждение, что он сохранён
+  redirect(`/admin/campaigns/${campaignId}?saved=report`);
 }

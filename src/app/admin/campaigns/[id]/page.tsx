@@ -40,7 +40,7 @@ export default async function CampaignPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ niche?: string; city?: string; max?: string; error?: string }>;
+  searchParams: Promise<{ niche?: string; city?: string; max?: string; error?: string; saved?: string }>;
 }) {
   const { id } = await params;
   const f = await searchParams;
@@ -106,13 +106,16 @@ export default async function CampaignPage({
       />
 
       {f.error && <p className="note note-err mb-4">{f.error}</p>}
+      {f.saved === "report" && (
+        <p className="note note-ok mb-4">Отчёт сохранён — клиент уже видит его у себя</p>
+      )}
 
       <section className="panel mb-5 p-5">
         <PhaseTrack status={campaign.status} />
       </section>
 
       <div className="grid gap-5 lg:grid-cols-[1fr_320px]">
-        <div className="space-y-5">
+        <div className="min-w-0 space-y-5">
           {/* ── БРИФ ── */}
           <section className="panel p-5">
             <h2 className="t-section mb-3">Бриф</h2>
@@ -120,7 +123,7 @@ export default async function CampaignPage({
             <div className="grid gap-x-6 gap-y-2 text-sm sm:grid-cols-2">
               <Row label="Бюджет" value={money(campaign.budget)} />
               <Row
-                label="Нужно creators"
+                label="Нужно креаторов"
                 value={campaign.creators_needed ? String(campaign.creators_needed) : "—"}
               />
               <Row label="Форматы" value={campaign.formats.join(", ") || "—"} />
@@ -161,7 +164,7 @@ export default async function CampaignPage({
 
             {needsPicking ? (
               <p className="text-sm text-[var(--color-muted)]">
-                Пока никого. Выберите креаторов ниже — клиент увидит их у себя.
+                Пока никого. Выберите ниже — клиент сразу их увидит.
               </p>
             ) : (
               <div className="space-y-2">
@@ -419,7 +422,7 @@ export default async function CampaignPage({
         </div>
 
         {/* ── ПРАВАЯ КОЛОНКА ── */}
-        <aside className="space-y-5">
+        <aside className="min-w-0 space-y-5">
           <NextStep status={campaign.status}>
             {meta.next ? (
               <form action={setCampaignStatus.bind(null, campaign.id)}>

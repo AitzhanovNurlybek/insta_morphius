@@ -23,7 +23,7 @@ export default async function BusinessesPage({
 
   return (
     <>
-      <PageTitle title="Бизнесы" />
+      <PageTitle title="Клиенты" />
 
       {error && (
         <p className="note note-err mb-4">
@@ -33,7 +33,7 @@ export default async function BusinessesPage({
 
       <form action={createBusiness} className="panel mb-6 space-y-4 p-5">
         <h2 className="t-section">
-          Добавить клиента вручную
+          Новый клиент
         </h2>
         <div className="grid gap-4 sm:grid-cols-3">
           <Field label="Название *">

@@ -162,6 +162,20 @@ for (const route of ["/privacy", "/terms", "/data-deletion", "/connect/demo-toke
 
 
 
+// 12. Ничего не вылезает за экран телефона.
+// Проверка появилась не зря: на 390px уезжали карточка кампании и таблица
+// истории — глазами на десктопе это не видно вообще.
+await browser.setCookie({ name: "demo_role", value: "admin", domain: "localhost", path: "/" });
+await page.setViewport({ width: 390, height: 844, deviceScaleFactor: 2, isMobile: true });
+
+for (const route of ["/admin", "/admin/creators", "/admin/creators/cr-1", "/admin/campaigns/cm-1"]) {
+  await page.goto(`${BASE}${route}`, { waitUntil: "networkidle2" });
+  const over = await page.evaluate(
+    () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+  );
+  check(`${route} влезает в экран телефона`, over <= 1, over > 1 ? `вылезает на ${over}px` : "");
+}
+
 const unique = [...new Set(problems)];
 console.log(`\nИтог: ${pass} прошло, ${fail} провалено.`);
 if (unique.length) console.log(`Сетевые/JS проблемы:\n${unique.join("\n")}`);

@@ -31,7 +31,7 @@ export default async function CampaignsPage() {
     <>
       <PageTitle
         title="Кампании"
-        hint="Слева направо — путь кампании от заявки до отчёта"
+        hint="Путь кампании — слева направо"
       />
 
       {rows.length === 0 ? (
@@ -53,7 +53,7 @@ export default async function CampaignsPage() {
                   </span>
                 </header>
 
-                <div className="space-y-2.5">
+                <div className="stagger space-y-2.5">
                   {items.length === 0 && (
                     <div className="rounded-xl border border-dashed border-[var(--color-line)] px-3 py-6 text-center text-xs text-[var(--color-muted)]">
                       пусто

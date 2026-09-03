@@ -2,6 +2,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { PageTitle, SectionTitle, Empty, Stat } from "@/components/shell";
 import { HowItWorks } from "@/components/how-it-works";
+import { Activation } from "@/components/activation";
 import { Icon } from "@/components/icons";
 import { statusMeta } from "@/lib/funnel";
 import { CAMPAIGN_STATUS_LABEL } from "@/lib/constants";
@@ -23,32 +24,56 @@ type Row = Campaign & { businesses: { name: string } | null };
 export default async function AdminDashboard() {
   const supabase = await createClient();
 
-  const [creators, businesses, newRequests, inWork, campaigns] = await Promise.all([
-    supabase.from("creators").select("id", { count: "exact", head: true }).eq("status", "active"),
-    supabase.from("businesses").select("id", { count: "exact", head: true }),
-    supabase
-      .from("campaigns")
-      .select("id", { count: "exact", head: true })
-      .eq("status", "new_request"),
-    supabase.from("campaigns").select("id", { count: "exact", head: true }).in("status", IN_WORK),
-    supabase
-      .from("campaigns")
-      .select("*, businesses(name)")
-      .neq("status", "completed")
-      .order("updated_at", { ascending: false })
-      .limit(12),
-  ]);
+  const [creators, businesses, newRequests, inWork, campaigns, allCampaigns, finished] =
+    await Promise.all([
+      supabase.from("creators").select("id", { count: "exact", head: true }).eq("status", "active"),
+      supabase.from("businesses").select("id", { count: "exact", head: true }),
+      supabase
+        .from("campaigns")
+        .select("id", { count: "exact", head: true })
+        .eq("status", "new_request"),
+      supabase.from("campaigns").select("id", { count: "exact", head: true }).in("status", IN_WORK),
+      supabase
+        .from("campaigns")
+        .select("*, businesses(name)")
+        .neq("status", "completed")
+        .order("updated_at", { ascending: false })
+        .limit(12),
+      supabase.from("campaigns").select("id", { count: "exact", head: true }),
+      supabase
+        .from("campaigns")
+        .select("id", { count: "exact", head: true })
+        .eq("status", "completed"),
+    ]);
 
   // Новые заявки наверх: остальное можно отложить, их — нет
   const rows = ((campaigns.data ?? []) as Row[]).sort((a, b) =>
     a.status === "new_request" ? -1 : b.status === "new_request" ? 1 : 0,
   );
 
+  // Пока агентство не прошло путь целиком, на первом экране стоит чек-лист.
+  // Когда прошло — вместо него карта процесса, и та закрывается кнопкой.
+  // Два объясняющих блока разом читаются как шум, поэтому всегда один.
+  const activated =
+    (creators.count ?? 0) > 0 &&
+    (businesses.count ?? 0) > 0 &&
+    (allCampaigns.count ?? 0) > 0 &&
+    (finished.count ?? 0) > 0;
+
   return (
     <>
       <PageTitle title="Дашборд" hint="Что происходит прямо сейчас" />
 
-      <HowItWorks audience="agency" />
+      {activated ? (
+        <HowItWorks audience="agency" />
+      ) : (
+        <Activation
+          creators={creators.count ?? 0}
+          clients={businesses.count ?? 0}
+          campaigns={allCampaigns.count ?? 0}
+          finished={finished.count ?? 0}
+        />
+      )}
 
       <div className="mb-8 grid grid-cols-2 gap-3 lg:grid-cols-4">
         <Stat
@@ -58,32 +83,38 @@ export default async function AdminDashboard() {
           note={(newRequests.count ?? 0) > 0 ? "ждут подбора" : "всё разобрано"}
         />
         <Stat label="Кампаний в работе" value={String(inWork.count ?? 0)} />
-        <Stat label="Активных creators" value={String(creators.count ?? 0)} />
+        <Stat label="Креаторов в базе" value={String(creators.count ?? 0)} />
         <Stat label="Клиентов" value={String(businesses.count ?? 0)} />
       </div>
 
-      <SectionTitle
-        aside={
-          <Link href="/admin/campaigns" className="link-accent text-sm">
-            Вся доска
-          </Link>
-        }
-      >
-        Что сделать
-      </SectionTitle>
-
-      {rows.length === 0 ? (
-        <Empty
-          text="Активных кампаний нет. Заведите клиента и создайте бриф от его имени."
-          action={
-            <Link href="/admin/businesses" className="btn btn-primary">
-              <Icon name="plus" size={15} />
-              Добавить клиента
+      {/* Пока идёт чек-лист, пустой блок «Что сделать» под ним только дублирует
+          призыв — показываем его, только когда есть о чём говорить */}
+      {(rows.length > 0 || activated) && (
+        <SectionTitle
+          aside={
+            <Link href="/admin/campaigns" className="link-accent text-sm">
+              Вся доска
             </Link>
           }
-        />
+        >
+          Что сделать
+        </SectionTitle>
+      )}
+
+      {rows.length === 0 ? (
+        activated && (
+          <Empty
+            text="Активных кампаний нет — все закрыты."
+            action={
+              <Link href="/admin/businesses" className="btn btn-primary">
+                <Icon name="plus" size={15} />
+                Новый бриф
+              </Link>
+            }
+          />
+        )
       ) : (
-        <div className="space-y-2.5">
+        <div className="stagger space-y-2.5">
           {rows.map((c) => {
             const meta = statusMeta(c.status);
             const urgent = c.status === "new_request";
@@ -121,7 +152,8 @@ export default async function AdminDashboard() {
                     {CAMPAIGN_STATUS_LABEL[c.status]}
                   </div>
                   <div className="tabular mt-0.5 text-xs text-[var(--color-muted)]">
-                    {money(c.budget)} · до {date(c.ends_on)}
+                    {money(c.budget)}
+                    {c.ends_on ? ` · до ${date(c.ends_on)}` : ""}
                   </div>
                 </div>
 

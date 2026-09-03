@@ -49,7 +49,7 @@ export default async function BusinessHome() {
     <>
       <PageTitle
         title="Мои кампании"
-        hint="Здесь видно, на каком шаге каждая работа"
+        hint="На каком шаге каждая работа"
         action={
           <Link href="/business/campaigns/new" className="btn btn-primary">
             <Icon name="plus" size={15} />
@@ -72,7 +72,7 @@ export default async function BusinessHome() {
       ) : (
         <div className="space-y-6">
           {active.length > 0 && (
-            <div className="space-y-3">
+            <div className="stagger space-y-3">
               {active.map((c) => (
                 <CampaignRow key={c.id} campaign={c} />
               ))}
@@ -82,7 +82,7 @@ export default async function BusinessHome() {
           {done.length > 0 && (
             <div>
               <h2 className="t-section mb-3">Завершённые</h2>
-              <div className="space-y-3">
+              <div className="stagger space-y-3">
                 {done.map((c) => (
                   <CampaignRow key={c.id} campaign={c} />
                 ))}
@@ -105,7 +105,8 @@ function CampaignRow({ campaign }: { campaign: Campaign }) {
         <div>
           <div className="font-medium">{campaign.title}</div>
           <div className="tabular mt-0.5 text-xs text-[var(--color-muted)]">
-            {money(campaign.budget)} · до {date(campaign.ends_on)}
+            {money(campaign.budget)}
+            {campaign.ends_on ? ` · до ${date(campaign.ends_on)}` : ""}
           </div>
         </div>
         <span className="badge">

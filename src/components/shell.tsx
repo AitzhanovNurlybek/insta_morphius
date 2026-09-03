@@ -26,15 +26,19 @@ export function Shell({
       {isDemo() && <DemoBanner />}
 
       <header className="chrome sticky top-0 z-30">
-        <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-6 gap-y-3 px-4 py-3">
-          <div className="mr-1">
+        {/* Одна строка на любой ширине: разделы скроллятся, а не переносятся
+            на три ряда и не съедают пол-экрана на телефоне */}
+        <div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-3 sm:gap-5">
+          <div className="shrink-0">
             <Logo className="text-sm" />
-            <div className="text-xs text-[var(--color-muted)]">{subtitle}</div>
+            <div className="hidden text-xs text-[var(--color-muted)] sm:block">{subtitle}</div>
           </div>
 
-          <NavLinks items={nav} />
+          <div className="nav-scroll min-w-0 flex-1">
+            <NavLinks items={nav} />
+          </div>
 
-          <form action={signOut} className="ml-auto">
+          <form action={signOut} className="shrink-0">
             <button className="btn btn-ghost btn-sm" type="submit">
               Выйти
             </button>

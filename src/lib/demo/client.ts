@@ -29,13 +29,18 @@ const globalStore = globalThis as unknown as { __demoTables?: Tables };
 
 function tables(): Tables {
   if (!globalStore.__demoTables) {
+    // DEMO_EMPTY=1 — продукт как у нового агентства: пустые экраны и чек-лист
+    // первых шагов. Нужно, чтобы проверять именно пустые состояния,
+    // а не только заполненные.
+    const empty = process.env.DEMO_EMPTY === "1";
+
     globalStore.__demoTables = {
       profiles: clone(seedProfiles),
-      creators: clone(seedCreators),
-      businesses: clone(seedBusinesses),
-      campaigns: clone(seedCampaigns),
-      campaign_creators: clone(seedCampaignCreators),
-      campaign_status_log: clone(seedStatusLog),
+      creators: empty ? [] : clone(seedCreators),
+      businesses: empty ? [] : clone(seedBusinesses),
+      campaigns: empty ? [] : clone(seedCampaigns),
+      campaign_creators: empty ? [] : clone(seedCampaignCreators),
+      campaign_status_log: empty ? [] : clone(seedStatusLog),
       data_deletion_requests: clone(seedDeletionRequests),
     };
   }

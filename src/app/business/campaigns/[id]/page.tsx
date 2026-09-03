@@ -118,7 +118,7 @@ export default async function BusinessCampaignPage({
         {tasks.length === 0 ? (
           <Empty text="Агентство подбирает креаторов. Как только предложит — они появятся здесь." />
         ) : (
-          <div className="grid gap-3 sm:grid-cols-2">
+          <div className="stagger grid gap-3 sm:grid-cols-2">
             {tasks.map((t) => {
               const c = creators.get(t.creator_id);
               if (!c) return null;
@@ -198,7 +198,7 @@ export default async function BusinessCampaignPage({
           <div className="grid gap-y-2 text-sm">
             <Row label="Бюджет" value={money(campaign.budget)} />
             <Row
-              label="Нужно creators"
+              label="Нужно креаторов"
               value={campaign.creators_needed ? String(campaign.creators_needed) : "—"}
             />
             <Row label="Форматы" value={campaign.formats.join(", ") || "—"} />

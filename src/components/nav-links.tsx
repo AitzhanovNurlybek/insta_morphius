@@ -15,7 +15,7 @@ export function NavLinks({ items }: { items: NavItem[] }) {
   const pathname = usePathname();
 
   return (
-    <nav className="flex flex-wrap items-center gap-1">
+    <nav className="flex w-max items-center gap-1">
       {items.map((item) => {
         const isRoot = item.href === "/admin" || item.href === "/business";
         const active = isRoot

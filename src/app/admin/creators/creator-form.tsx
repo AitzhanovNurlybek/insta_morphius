@@ -106,7 +106,7 @@ export function CreatorForm({
           </Field>
         </div>
         <p className="text-xs text-[var(--color-muted)]">
-          Дата обновления цифр проставляется автоматически при сохранении.
+          Дату обновления проставим сами.
         </p>
       </section>
 
@@ -129,7 +129,7 @@ export function CreatorForm({
               defaultValue={creator?.price_max ?? ""}
             />
           </Field>
-          <Field label="Тир">
+          <Field label="Уровень">
             <select className="select" name="tier" defaultValue={creator?.tier ?? "novice"}>
               {Object.entries(TIER_LABEL).map(([value, label]) => (
                 <option key={value} value={value}>
@@ -181,7 +181,7 @@ export function CreatorForm({
           <span>
             Есть согласие на обработку данных и хранение статистики аккаунта
             <span className="block text-xs text-[var(--color-muted)]">
-              Понадобится для Meta App Review и закона РК о персональных данных
+              Нужно для Instagram и закона о персональных данных
             </span>
           </span>
         </label>

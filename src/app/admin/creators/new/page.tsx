@@ -11,7 +11,7 @@ export default async function NewCreatorPage({
 
   return (
     <>
-      <PageTitle title="Новый creator" />
+      <PageTitle title="Новый креатор" />
       {error && (
         <p className="note note-err mb-4">
           {error}

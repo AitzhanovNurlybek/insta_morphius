@@ -45,7 +45,7 @@ export function BriefForm({
             placeholder="600000"
           />
         </Field>
-        <Field label="Сколько нужно creators">
+        <Field label="Сколько нужно креаторов">
           <input
             className="input"
             name="creators_needed"

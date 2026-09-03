@@ -55,7 +55,7 @@ export const CAMPAIGN_FLOW: CampaignStatus[] = [
 export const CAMPAIGN_STATUS_LABEL: Record<CampaignStatus, string> = {
   new_request: "Новая заявка",
   brief_approved: "Бриф согласован",
-  creators_selected: "Creators подобраны",
+  creators_selected: "Креаторы подобраны",
   filming: "Съёмка",
   editing: "Монтаж",
   client_review: "На согласовании у клиента",

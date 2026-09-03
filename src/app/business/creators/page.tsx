@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { FilterForm } from "@/components/filter-form";
 import { createClient } from "@/lib/supabase/server";
 import { PageTitle, Empty } from "@/components/shell";
 import { CreatorCard } from "@/components/creator-card";
@@ -33,11 +34,11 @@ export default async function ShowcasePage({
   return (
     <>
       <PageTitle
-        title="Витрина creators"
-        hint="Кто работает с агентством. Выбирать никого не нужно — подбор сделаем сами"
+        title="Каталог креаторов"
+        hint="Просто посмотреть. Подбор агентство сделает само"
       />
 
-      <form className="panel mb-5 grid grid-cols-2 gap-3 p-4 sm:grid-cols-4">
+      <FilterForm className="panel mb-5 grid grid-cols-2 gap-3 p-4 sm:grid-cols-4">
         <select className="select" name="niche" defaultValue={f.niche ?? ""}>
           <option value="">Все ниши</option>
           {NICHES.map((n) => (
@@ -64,7 +65,7 @@ export default async function ShowcasePage({
         <button className="btn" type="submit">
           Показать
         </button>
-      </form>
+      </FilterForm>
 
       <div className="mb-3 flex items-center justify-between text-sm text-[var(--color-muted)]">
         <span>
@@ -80,7 +81,7 @@ export default async function ShowcasePage({
       {creators.length === 0 ? (
         <Empty text="Под фильтр никто не подходит. Попробуйте расширить бюджет или нишу." />
       ) : (
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="stagger grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {creators.map((c) => (
             <div key={c.id} data-creator>
               <CreatorCard

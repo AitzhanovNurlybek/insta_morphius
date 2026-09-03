@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { FilterForm } from "@/components/filter-form";
 import { createClient } from "@/lib/supabase/server";
 import { PageTitle, Empty } from "@/components/shell";
 import { CreatorCard } from "@/components/creator-card";
@@ -42,17 +43,17 @@ export default async function CreatorsPage({
   return (
     <>
       <PageTitle
-        title="База creators"
-        hint="Все, с кем агентство работает. Отсюда идёт подбор под кампанию"
+        title="Креаторы"
+        hint="Отсюда подбираете людей под кампанию"
         action={
           <Link href="/admin/creators/new" className="btn btn-primary">
             <Icon name="plus" size={15} />
-            Добавить creator
+            Добавить креатора
           </Link>
         }
       />
 
-      <form className="panel mb-5 grid grid-cols-2 gap-3 p-4 lg:grid-cols-12">
+      <FilterForm className="panel mb-5 grid grid-cols-2 gap-3 p-4 lg:grid-cols-12">
         <div className="relative col-span-2 lg:col-span-3">
           <Icon
             name="search"
@@ -83,7 +84,7 @@ export default async function CreatorsPage({
           ))}
         </select>
         <select className="select lg:col-span-2" name="tier" defaultValue={f.tier ?? ""}>
-          <option value="">Любой тир</option>
+          <option value="">Любой уровень</option>
           {Object.entries(TIER_LABEL).map(([value, label]) => (
             <option key={value} value={value}>
               {label}
@@ -100,7 +101,7 @@ export default async function CreatorsPage({
         <button className="btn col-span-2 lg:col-span-1" type="submit">
           Найти
         </button>
-      </form>
+      </FilterForm>
 
       <div className="mb-3 flex items-center justify-between text-sm text-[var(--color-muted)]">
         <span>
@@ -123,7 +124,7 @@ export default async function CreatorsPage({
           }
         />
       ) : (
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="stagger grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {creators.map((c) => (
             <div key={c.id} data-creator>
               <CreatorCard

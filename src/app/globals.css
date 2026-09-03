@@ -39,6 +39,10 @@
   --color-jade: #4fa383;
   --color-danger: #ff6b57;
 
+  /* Встроенные кривые слишком мягкие — движение выглядит вялым */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+
   --font-sans: ui-sans-serif, system-ui, "Segoe UI", Roboto, Arial, sans-serif;
 
   /* Тени тёплые: нейтрально-серая тень на красном фоне выглядит грязной */
@@ -175,10 +179,10 @@ body {
     color: var(--color-text);
     cursor: pointer;
     transition:
-      background-color 140ms ease-out,
-      border-color 140ms ease-out,
-      transform 100ms ease-out,
-      opacity 140ms ease-out;
+      background-color 140ms var(--ease-out),
+      border-color 140ms var(--ease-out),
+      transform 100ms var(--ease-out),
+      opacity 140ms var(--ease-out);
     user-select: none;
   }
   .btn:hover {
@@ -239,8 +243,8 @@ body {
     font-size: 0.9rem;
     font-family: inherit;
     transition:
-      border-color 140ms ease-out,
-      background-color 140ms ease-out;
+      border-color 140ms var(--ease-out),
+      background-color 140ms var(--ease-out);
   }
   .input::placeholder,
   .textarea::placeholder {
@@ -357,7 +361,7 @@ body {
     vertical-align: middle;
   }
   .row-hover {
-    transition: background-color 120ms ease-out;
+    transition: background-color 120ms var(--ease-out);
   }
   .row-hover:hover {
     background: color-mix(in srgb, var(--color-accent) 6%, transparent);
@@ -366,9 +370,9 @@ body {
   /* Карточка-ссылка: приподнимается, но не прыгает */
   .card-link {
     transition:
-      border-color 140ms ease-out,
-      box-shadow 180ms ease-out,
-      transform 140ms ease-out;
+      border-color 140ms var(--ease-out),
+      box-shadow 180ms var(--ease-out),
+      transform 140ms var(--ease-out);
   }
   .card-link:hover {
     border-color: color-mix(in srgb, var(--color-accent) 45%, var(--color-line));
@@ -446,4 +450,76 @@ body {
   .badge {
     color: var(--color-text);
   }
+}
+
+/* ─────────────────────  ПОЯВЛЕНИЕ СПИСКОВ  ─────────────────────
+   Карточки въезжают каскадом: одновременное появление всего сразу
+   читается как мигание. Задержки короткие — иначе интерфейс
+   начинает казаться медленным. */
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+.stagger > * {
+  animation: rise 240ms var(--ease-out) both;
+}
+.stagger > *:nth-child(1) { animation-delay: 0ms; }
+.stagger > *:nth-child(2) { animation-delay: 40ms; }
+.stagger > *:nth-child(3) { animation-delay: 80ms; }
+.stagger > *:nth-child(4) { animation-delay: 120ms; }
+.stagger > *:nth-child(5) { animation-delay: 160ms; }
+.stagger > *:nth-child(6) { animation-delay: 200ms; }
+.stagger > *:nth-child(n + 7) { animation-delay: 240ms; }
+
+/* На тапе наведение срабатывает ложно и залипает — гасим его там,
+   где настоящего курсора нет */
+@media (hover: none) {
+  .card-link:hover {
+    transform: none;
+    box-shadow: var(--shadow-card);
+    border-color: var(--color-line);
+  }
+  .btn:hover {
+    background: var(--color-surface-2);
+    border-color: var(--color-line-strong);
+  }
+  .row-hover:hover {
+    background: transparent;
+  }
+}
+
+/* Полоса разделов на узком экране скроллится, а не переносится на три ряда */
+.nav-scroll {
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  /* Мягкий край вместо рубленого обреза на середине слова */
+  mask-image: linear-gradient(to right, transparent 0, #000 8px, #000 calc(100% - 20px), transparent 100%);
+}
+@media (min-width: 1024px) {
+  .nav-scroll {
+    mask-image: none;
+  }
+}
+.nav-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+/* ─────────────────────────  СКЕЛЕТЫ  ─────────────────────────
+   Мягкое дыхание, а не бегущий блик: блик на тёмном фоне бросается
+   в глаза сильнее, чем содержимое, которое он изображает. */
+
+@keyframes breathe {
+  50% {
+    opacity: 0.45;
+  }
+}
+
+.skeleton {
+  background: var(--color-surface-2);
+  animation: breathe 1.4s ease-in-out infinite;
 }

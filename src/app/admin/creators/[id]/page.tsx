@@ -103,9 +103,8 @@ export default async function CreatorPage({
         ) : (
           <div className="space-y-3 text-sm">
             <p className="text-[var(--color-muted)]">
-              Отправьте креатору персональную ссылку — он подтвердит доступ, и цифры
-              начнут обновляться сами. До одобрения приложения в Meta ссылка работает
-              только для аккаунтов-тестировщиков.
+              Отправьте креатору эту ссылку — он подтвердит доступ, и цифры начнут
+              обновляться сами. До одобрения в Meta работает только для тестовых аккаунтов.
             </p>
             <code className="block overflow-x-auto rounded-lg border border-[var(--color-line)] bg-[var(--color-bg)] px-3 py-2 text-xs">
               {connectUrl}
@@ -168,10 +167,6 @@ export default async function CreatorPage({
             Загрузить
           </button>
         </form>
-        <p className="mt-2 text-xs text-[var(--color-muted)]">
-          Ссылки на чужие площадки удобнее вносить в форме ниже — файлы нужны, когда
-          материал негде разместить.
-        </p>
       </div>
 
       <div className="panel mb-6 p-5">
@@ -179,7 +174,8 @@ export default async function CreatorPage({
         {tasks.length === 0 ? (
           <p className="text-sm text-[var(--color-muted)]">Пока не участвовал в кампаниях.</p>
         ) : (
-          <table className="w-full">
+          <div className="overflow-x-auto">
+          <table className="w-full min-w-[420px]">
             <tbody>
               {tasks.map((t) => (
                 <tr key={t.id}>
@@ -203,6 +199,7 @@ export default async function CreatorPage({
               ))}
             </tbody>
           </table>
+          </div>
         )}
       </div>
 

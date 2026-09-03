@@ -46,7 +46,7 @@ export default async function BriefsPage() {
                 <div className="flex items-center gap-2">
                   <StatusBadge status={c.status} />
                   <Link href={`/admin/campaigns/${c.id}`} className="btn btn-primary">
-                    Подобрать creators
+                    Подобрать креаторов
                   </Link>
                 </div>
               </div>
@@ -55,7 +55,7 @@ export default async function BriefsPage() {
 
               <div className="grid gap-x-6 gap-y-1 text-sm sm:grid-cols-2 lg:grid-cols-4">
                 <Row label="Бюджет" value={money(c.budget)} />
-                <Row label="Нужно creators" value={c.creators_needed ? String(c.creators_needed) : "—"} />
+                <Row label="Нужно креаторов" value={c.creators_needed ? String(c.creators_needed) : "—"} />
                 <Row label="Форматы" value={c.formats.join(", ") || "—"} />
                 <Row
                   label="Аудитория"
