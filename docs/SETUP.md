@@ -19,6 +19,13 @@ npm run dev
 Демо-данные — `src/lib/demo/seed.ts`. Как только в окружении появляются ключи
 Supabase, режим выключается сам.
 
+Чтобы посмотреть продукт глазами нового агентства — пустые экраны и чек-лист
+первых шагов:
+
+```bash
+DEMO_EMPTY=1 npm run dev
+```
+
 ## 1. Supabase
 
 1. https://supabase.com → New project. Регион — ближайший (`ap-southeast-1` Сингапур
