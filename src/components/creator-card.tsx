@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Avatar } from "@/components/avatar";
 import { Icon } from "@/components/icons";
 import { TierBadge } from "@/components/shell";
+import { NICHE_EMOJI } from "@/lib/constants";
 import { compact, priceRange } from "@/lib/format";
 import type { CreatorTier } from "@/lib/types";
 
@@ -59,7 +60,7 @@ export function CreatorCard({
       <div className="mb-3 flex flex-wrap gap-1">
         {creator.niches.map((n) => (
           <span key={n} className="badge">
-            {n}
+            {NICHE_EMOJI[n]} {n}
           </span>
         ))}
       </div>

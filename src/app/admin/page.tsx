@@ -62,7 +62,7 @@ export default async function AdminDashboard() {
 
   return (
     <>
-      <PageTitle title="Дашборд" hint="Что происходит прямо сейчас" />
+      <PageTitle title="Главная" hint="Что происходит прямо сейчас" />
 
       {activated ? (
         <HowItWorks audience="agency" />
@@ -104,7 +104,8 @@ export default async function AdminDashboard() {
       {rows.length === 0 ? (
         activated && (
           <Empty
-            text="Активных кампаний нет — все закрыты."
+            emoji="🎉"
+            text="Всё закрыто. Можно выдохнуть"
             action={
               <Link href="/admin/businesses" className="btn btn-primary">
                 <Icon name="plus" size={15} />

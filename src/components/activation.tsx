@@ -65,7 +65,7 @@ export function Activation({
         <div>
           <h2 className="t-title">С чего начать</h2>
           <p className="mt-0.5 text-sm text-[var(--color-muted)]">
-            Четыре шага — и агентство работает в системе, а не в таблицах
+            Четыре шага — и всё работает без таблиц
           </p>
         </div>
         <span className="tabular text-sm text-[var(--color-muted)]">

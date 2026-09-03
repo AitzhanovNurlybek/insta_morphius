@@ -8,11 +8,27 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
+/**
+ * Тема ставится до первой отрисовки, иначе на каждой загрузке моргает.
+ * По умолчанию светлая: системную настройку намеренно не подхватываем —
+ * тёмная у многих стоит на весь телефон, а этот интерфейс должен быть лёгким.
+ */
+const themeScript = `
+try {
+  document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+} catch (e) {
+  document.documentElement.dataset.theme = "light";
+}
+`;
+
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="ru">
+    <html lang="ru" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+      </head>
       <body className="min-h-screen antialiased">{children}</body>
     </html>
   );

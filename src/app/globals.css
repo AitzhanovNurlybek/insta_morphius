@@ -14,30 +14,34 @@
    ============================================================ */
 
 @theme {
-  /* Нейтральная база */
-  --color-bg: #120a0c;
-  --color-surface: #1a1013;
-  --color-surface-2: #23161a;
-  --color-surface-3: #2e1d22;
-  --color-line: #38232a;
-  --color-line-strong: #4e3138;
+  /* ── Светлая тема по умолчанию ──
+     База тёплая, с розовым подмесом, а не белая: чистый белый рядом
+     с багрянцем читается как больничный кафель. Тёмная тема осталась,
+     переключается в шапке. */
+
+  --color-bg: #fbf6f5;
+  --color-surface: #ffffff;
+  --color-surface-2: #f6eeed;
+  --color-surface-3: #efe1e0;
+  --color-line: #ebdcda;
+  --color-line-strong: #d8c2c0;
 
   /* Текст */
-  --color-text: #f5eced;
-  --color-text-2: #cbb2b7;
-  --color-muted: #9a8288;
+  --color-text: #241417;
+  --color-text-2: #5c464a;
+  --color-muted: #8a7175;
 
-  /* Брендовый красный */
-  --color-wine: #4a0f1a;
+  /* Брендовый красный: на светлом нужен глубже, иначе не хватает контраста */
+  --color-wine: #f5e3e5;
   --color-red-700: #8e1626;
-  --color-red-600: #b01c30;
-  --color-accent: #d42a42;
-  --color-red-400: #e8546a;
+  --color-red-600: #a81730;
+  --color-accent: #c4203a;
+  --color-red-400: #b01c30;
 
   /* Поддерживающие */
-  --color-gold: #e0a458;
-  --color-jade: #4fa383;
-  --color-danger: #ff6b57;
+  --color-gold: #a9711a;
+  --color-jade: #2e7d5b;
+  --color-danger: #c4392b;
 
   /* Встроенные кривые слишком мягкие — движение выглядит вялым */
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
@@ -45,19 +49,58 @@
 
   --font-sans: ui-sans-serif, system-ui, "Segoe UI", Roboto, Arial, sans-serif;
 
-  /* Тени тёплые: нейтрально-серая тень на красном фоне выглядит грязной */
+  /* Тени тёплые и мягкие: серая тень на тёплом фоне выглядит грязной */
+  --shadow-card: 0 1px 2px rgba(80, 30, 35, 0.05), 0 6px 20px -10px rgba(80, 30, 35, 0.12);
+  --shadow-lift: 0 2px 6px rgba(80, 30, 35, 0.08), 0 18px 40px -18px rgba(150, 30, 50, 0.25);
+
+  --radius-card: 18px;
+}
+
+/* ─────────────────────────  ТЁМНАЯ ТЕМА  ─────────────────────────
+   Включается переключателем в шапке; при первом заходе берётся
+   из настроек системы. Меняются только значения токенов —
+   ни один компонент об этом не знает. */
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --color-bg: #160e10;
+  --color-surface: #1f1418;
+  --color-surface-2: #291a1f;
+  --color-surface-3: #342128;
+  --color-line: #3d262d;
+  --color-line-strong: #54353d;
+
+  --color-text: #f7eeef;
+  --color-text-2: #d3bcc0;
+  --color-muted: #a1898e;
+
+  --color-wine: #4a0f1a;
+  --color-red-700: #8e1626;
+  --color-red-600: #b01c30;
+  --color-accent: #d94059;
+  --color-red-400: #f0788a;
+
+  --color-gold: #e0a458;
+  --color-jade: #4fa383;
+  --color-danger: #ff6b57;
+
   --shadow-card: 0 1px 2px rgba(10, 4, 6, 0.4), 0 8px 24px -12px rgba(10, 4, 6, 0.6);
   --shadow-lift: 0 2px 4px rgba(10, 4, 6, 0.4), 0 16px 40px -16px rgba(74, 15, 26, 0.7);
+
+  background-image:
+    radial-gradient(1100px 520px at 15% -220px, rgba(217, 64, 89, 0.14), transparent 70%),
+    radial-gradient(900px 460px at 100% 0, rgba(74, 15, 26, 0.4), transparent 65%);
 }
 
 /* ─────────────────────────  ОСНОВА  ───────────────────────── */
 
 html {
   background: var(--color-bg);
-  /* Мягкое свечение вина сверху — глубина без картинки на фоне */
+  /* Тёплые пятна вместо ровной заливки — фон дышит, но не мешает читать */
   background-image:
-    radial-gradient(1200px 600px at 50% -300px, rgba(212, 42, 66, 0.12), transparent 70%),
-    radial-gradient(900px 500px at 100% 0, rgba(74, 15, 26, 0.35), transparent 60%);
+    radial-gradient(1100px 520px at 15% -200px, rgba(196, 32, 58, 0.07), transparent 70%),
+    radial-gradient(900px 460px at 100% 0, rgba(224, 164, 88, 0.09), transparent 65%);
   background-attachment: fixed;
   color: var(--color-text);
   font-family: var(--font-sans);
@@ -75,7 +118,7 @@ body {
 }
 
 ::selection {
-  background: rgba(212, 42, 66, 0.35);
+  background: color-mix(in srgb, var(--color-accent) 22%, transparent);
   color: var(--color-text);
 }
 
@@ -136,13 +179,9 @@ body {
   /* ─────────────────────  ПОВЕРХНОСТИ  ───────────────────── */
 
   .panel {
-    background: linear-gradient(
-      180deg,
-      color-mix(in srgb, var(--color-surface) 96%, white 4%),
-      var(--color-surface)
-    );
+    background: var(--color-surface);
     border: 1px solid var(--color-line);
-    border-radius: 14px;
+    border-radius: var(--radius-card);
     box-shadow: var(--shadow-card);
   }
 
@@ -169,8 +208,8 @@ body {
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    padding: 0.5rem 0.95rem;
-    border-radius: 10px;
+    padding: 0.5rem 1rem;
+    border-radius: 12px;
     font-size: 0.875rem;
     font-weight: 500;
     letter-spacing: -0.005em;
@@ -187,7 +226,7 @@ body {
   }
   .btn:hover {
     background: var(--color-surface-3);
-    border-color: #5c3941;
+    border-color: color-mix(in srgb, var(--color-line-strong) 70%, var(--color-text));
   }
   .btn:active {
     transform: scale(0.975);
@@ -204,8 +243,8 @@ body {
     color: #fff;
     font-weight: 600;
     box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.18),
-      0 6px 18px -8px rgba(212, 42, 66, 0.8);
+      inset 0 1px 0 rgba(255, 255, 255, 0.22),
+      0 6px 16px -8px color-mix(in srgb, var(--color-accent) 60%, transparent);
   }
   .btn-primary:hover {
     background: linear-gradient(180deg, var(--color-red-400), var(--color-accent));
@@ -224,9 +263,9 @@ body {
   }
 
   .btn-sm {
-    padding: 0.3rem 0.6rem;
+    padding: 0.32rem 0.7rem;
     font-size: 0.78rem;
-    border-radius: 8px;
+    border-radius: 10px;
   }
 
   /* ─────────────────────  ПОЛЯ  ───────────────────── */
@@ -235,9 +274,9 @@ body {
   .select,
   .textarea {
     width: 100%;
-    padding: 0.55rem 0.75rem;
-    border-radius: 10px;
-    background: color-mix(in srgb, var(--color-bg) 70%, black 10%);
+    padding: 0.6rem 0.8rem;
+    border-radius: 12px;
+    background: var(--color-bg);
     border: 1px solid var(--color-line);
     color: var(--color-text);
     font-size: 0.9rem;
@@ -260,7 +299,7 @@ body {
   .textarea:focus {
     outline: none;
     border-color: var(--color-accent);
-    background: color-mix(in srgb, var(--color-bg) 85%, var(--color-accent) 4%);
+    background: color-mix(in srgb, var(--color-surface) 92%, var(--color-accent) 8%);
   }
   .textarea {
     min-height: 96px;
@@ -327,17 +366,17 @@ body {
   }
 
   .badge-accent {
-    background: color-mix(in srgb, var(--color-accent) 16%, transparent);
+    background: color-mix(in srgb, var(--color-accent) 12%, var(--color-surface));
     border-color: color-mix(in srgb, var(--color-accent) 42%, transparent);
     color: var(--color-red-400);
   }
   .badge-gold {
-    background: color-mix(in srgb, var(--color-gold) 14%, transparent);
+    background: color-mix(in srgb, var(--color-gold) 14%, var(--color-surface));
     border-color: color-mix(in srgb, var(--color-gold) 38%, transparent);
     color: var(--color-gold);
   }
   .badge-jade {
-    background: color-mix(in srgb, var(--color-jade) 14%, transparent);
+    background: color-mix(in srgb, var(--color-jade) 14%, var(--color-surface));
     border-color: color-mix(in srgb, var(--color-jade) 38%, transparent);
     color: var(--color-jade);
   }
@@ -400,17 +439,17 @@ body {
   }
   .note-ok {
     border-color: color-mix(in srgb, var(--color-jade) 45%, transparent);
-    background: color-mix(in srgb, var(--color-jade) 12%, transparent);
+    background: color-mix(in srgb, var(--color-jade) 12%, var(--color-surface));
     color: var(--color-jade);
   }
   .note-warn {
     border-color: color-mix(in srgb, var(--color-gold) 45%, transparent);
-    background: color-mix(in srgb, var(--color-gold) 12%, transparent);
+    background: color-mix(in srgb, var(--color-gold) 12%, var(--color-surface));
     color: var(--color-gold);
   }
   .note-err {
     border-color: color-mix(in srgb, var(--color-danger) 45%, transparent);
-    background: color-mix(in srgb, var(--color-danger) 12%, transparent);
+    background: color-mix(in srgb, var(--color-danger) 12%, var(--color-surface));
     color: var(--color-danger);
   }
 }

@@ -65,7 +65,7 @@ export default async function BusinessesPage({
       </form>
 
       {businesses.length === 0 ? (
-        <Empty text="Клиентов пока нет." />
+        <Empty emoji="🏢" text="Клиентов пока нет" />
       ) : (
         <div className="panel overflow-x-auto">
           <table className="w-full min-w-[680px]">

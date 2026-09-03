@@ -62,7 +62,8 @@ export default async function BusinessHome() {
 
       {campaigns.length === 0 ? (
         <Empty
-          text="Кампаний пока нет. Опишите задачу — агентство подберёт креаторов и возьмёт всё на себя."
+          emoji="✨"
+          text="Опишите задачу — дальше всё сделает агентство"
           action={
             <Link href="/business/campaigns/new" className="btn btn-primary">
               Создать первый бриф

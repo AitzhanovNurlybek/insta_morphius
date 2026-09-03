@@ -15,6 +15,22 @@ export const NICHES = [
   "Business",
 ] as const;
 
+/** Значок к нише. Картинка узнаётся быстрее слова и снимает часть текста. */
+export const NICHE_EMOJI: Record<string, string> = {
+  Food: "🍜",
+  Fashion: "👗",
+  Beauty: "💄",
+  Auto: "🚗",
+  Lifestyle: "✨",
+  Sport: "🏃",
+  Tech: "💻",
+  Travel: "✈️",
+  Family: "👶",
+  Health: "🌿",
+  Education: "📚",
+  Business: "💼",
+};
+
 export const CITIES = [
   "Алматы",
   "Астана",

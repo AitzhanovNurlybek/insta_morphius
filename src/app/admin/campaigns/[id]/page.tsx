@@ -11,6 +11,7 @@ import {
   CAMPAIGN_FLOW,
   CAMPAIGN_STATUS_LABEL,
   CITIES,
+  NICHE_EMOJI,
   NICHES,
   TASK_FLOW,
   TASK_STATUS_LABEL,
@@ -351,7 +352,7 @@ export default async function CampaignPage({
                           {c.nickname ?? c.full_name}
                         </div>
                         <div className="truncate text-xs text-[var(--color-muted)]">
-                          {c.city} · {c.niches.join(", ")}
+                          {c.city} · {c.niches.map((n) => `${NICHE_EMOJI[n] ?? ""} ${n}`).join(", ")}
                         </div>
                       </div>
                       <div className="hidden text-right text-xs sm:block">

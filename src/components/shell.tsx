@@ -1,5 +1,6 @@
 import { signOut } from "@/app/(auth)/actions";
 import { NavLinks, type NavItem } from "@/components/nav-links";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { CAMPAIGN_STATUS_LABEL, TASK_STATUS_LABEL, TIER_LABEL } from "@/lib/constants";
 import { isDemo } from "@/lib/demo/mode";
 import type { CampaignStatus, CreatorTier, TaskStatus } from "@/lib/types";
@@ -36,6 +37,10 @@ export function Shell({
 
           <div className="nav-scroll min-w-0 flex-1">
             <NavLinks items={nav} />
+          </div>
+
+          <div className="shrink-0">
+            <ThemeToggle />
           </div>
 
           <form action={signOut} className="shrink-0">
@@ -134,10 +139,21 @@ export function TierBadge({ tier }: { tier: CreatorTier }) {
   );
 }
 
-export function Empty({ text, action }: { text: string; action?: React.ReactNode }) {
+export function Empty({
+  text,
+  action,
+  emoji = "🌱",
+}: {
+  text: string;
+  action?: React.ReactNode;
+  emoji?: string;
+}) {
   return (
     <div className="panel px-6 py-12 text-center">
-      <p className="text-sm text-[var(--color-muted)]">{text}</p>
+      <div className="mb-3 text-3xl" aria-hidden="true">
+        {emoji}
+      </div>
+      <p className="mx-auto max-w-sm text-sm text-[var(--color-muted)]">{text}</p>
       {action && <div className="mt-4 flex justify-center">{action}</div>}
     </div>
   );

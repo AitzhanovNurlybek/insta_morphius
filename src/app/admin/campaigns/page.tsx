@@ -35,7 +35,7 @@ export default async function CampaignsPage() {
       />
 
       {rows.length === 0 ? (
-        <Empty text="Кампаний пока нет. Они появятся, когда клиент оставит бриф." />
+        <Empty emoji="📋" text="Кампаний пока нет. Появятся, когда клиент оставит бриф" />
       ) : (
         <div className="grid gap-4 lg:grid-cols-4">
           {PHASES.map((phase, index) => {

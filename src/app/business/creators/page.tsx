@@ -79,7 +79,7 @@ export default async function ShowcasePage({
       </div>
 
       {creators.length === 0 ? (
-        <Empty text="Под фильтр никто не подходит. Попробуйте расширить бюджет или нишу." />
+        <Empty emoji="🔎" text="Никого не нашлось. Попробуйте другой бюджет или нишу" />
       ) : (
         <div className="stagger grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {creators.map((c) => (

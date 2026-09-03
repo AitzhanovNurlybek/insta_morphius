@@ -72,7 +72,7 @@ export default async function BusinessCampaignPage({
         <section className="panel mb-5 p-5">
           <div className="mb-3 flex items-center gap-2">
             <Icon name="trophy" size={16} className="text-[var(--color-jade)]" />
-            <h2 className="t-section">Итоги кампании</h2>
+            <h2 className="t-section">Итоги кампании 🎉</h2>
           </div>
 
           {campaign.report_text && (
@@ -116,7 +116,7 @@ export default async function BusinessCampaignPage({
         </div>
 
         {tasks.length === 0 ? (
-          <Empty text="Агентство подбирает креаторов. Как только предложит — они появятся здесь." />
+          <Empty emoji="🔎" text="Агентство подбирает креаторов — скоро появятся здесь" />
         ) : (
           <div className="stagger grid gap-3 sm:grid-cols-2">
             {tasks.map((t) => {

@@ -2,7 +2,7 @@ import { requireAdmin } from "@/lib/auth";
 import { Shell } from "@/components/shell";
 
 const NAV = [
-  { href: "/admin", label: "Дашборд", icon: "home" },
+  { href: "/admin", label: "Главная", icon: "home" },
   { href: "/admin/creators", label: "Креаторы", icon: "users" },
   { href: "/admin/briefs", label: "Заявки", icon: "inbox" },
   { href: "/admin/campaigns", label: "Кампании", icon: "board" },
