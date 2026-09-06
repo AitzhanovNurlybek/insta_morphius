@@ -116,7 +116,7 @@ export default async function CreatorsPage({
 
       {creators.length === 0 ? (
         <Empty
-          emoji="🔎"
+          icon="search"
           text="Под фильтр никто не подошёл"
           action={
             <Link href="/admin/creators" className="btn">

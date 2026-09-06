@@ -58,20 +58,20 @@ await page.goto(`${BASE}/admin/campaigns/cm-5`, { waitUntil: "networkidle2" });
 // Разделы свёрнуты по умолчанию — для проверки раскрываем всё
 const openAll = () => page.$$eval("details", (ds) => ds.forEach((d) => (d.open = true)));
 await openAll();
-const before = await page.$$eval("aside li", (els) => els.length);
+const before = await page.$$eval("#campaign-side li", (els) => els.length);
 // Берём любой статус, отличный от текущего: повторная установка того же
 // статуса журнал не пишет — и это правильно, но тест тогда врёт
-const { value: next, label } = await page.$eval('aside select[name="status"]', (el) => {
+const { value: next, label } = await page.$eval('#campaign-side select[name="status"]', (el) => {
   const other = [...el.options].find((o) => o.value !== el.value);
   return { value: other.value, label: other.textContent.trim() };
 });
-await page.select('aside select[name="status"]', next);
+await page.select('#campaign-side select[name="status"]', next);
 await Promise.all([
   page.waitForNavigation({ waitUntil: "networkidle2" }),
-  page.click('aside button[type="submit"]'),
+  page.click('#campaign-side button[type="submit"]'),
 ]);
 const body = await page.$eval("body", (el) => el.innerText);
-const after = await page.$$eval("aside li", (els) => els.length);
+const after = await page.$$eval("#campaign-side li", (els) => els.length);
 check("смена статуса применилась", body.includes(label), `на «${label}»`);
 check("запись попала в журнал", after === before + 1, `было ${before}, стало ${after}`);
 

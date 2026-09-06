@@ -6,38 +6,78 @@ import { Icon } from "@/components/icons";
 
 export type NavItem = { href: string; label: string; icon: string };
 
-/**
- * Активный раздел подсвечен: экран обязан отвечать на вопрос «где я».
- * Совпадение по префиксу, но корень раздела — только точным равенством,
- * иначе «Дашборд» горит на всех вложенных страницах.
- */
-export function NavLinks({ items }: { items: NavItem[] }) {
+function useActive(href: string) {
   const pathname = usePathname();
+  // Корень раздела — только точным совпадением, иначе «Главная»
+  // горит на всех вложенных страницах
+  const isRoot = ["/admin", "/business", "/blogger/me"].includes(href);
+  return isRoot ? pathname === href : pathname === href || pathname.startsWith(`${href}/`);
+}
 
+/** Горизонтальная полоса — только для узкого экрана. */
+export function NavLinks({ items }: { items: NavItem[] }) {
   return (
     <nav className="flex w-max items-center gap-1">
-      {items.map((item) => {
-        const isRoot = item.href === "/admin" || item.href === "/business";
-        const active = isRoot
-          ? pathname === item.href
-          : pathname === item.href || pathname.startsWith(`${item.href}/`);
-
-        return (
-          <Link
-            key={item.href}
-            href={item.href}
-            aria-current={active ? "page" : undefined}
-            className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm transition-colors duration-150 ${
-              active
-                ? "bg-[color-mix(in_srgb,var(--color-accent)_18%,transparent)] text-[var(--color-red-400)]"
-                : "text-[var(--color-muted)] hover:bg-[var(--color-surface-2)] hover:text-[var(--color-text)]"
-            }`}
-          >
-            <Icon name={item.icon} size={15} />
-            {item.label}
-          </Link>
-        );
-      })}
+      {items.map((item) => (
+        <NavChip key={item.href} item={item} />
+      ))}
     </nav>
+  );
+}
+
+function NavChip({ item }: { item: NavItem }) {
+  const active = useActive(item.href);
+  return (
+    <Link
+      href={item.href}
+      aria-current={active ? "page" : undefined}
+      className={`flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-sm transition-colors duration-150 ${
+        active
+          ? "bg-[color-mix(in_srgb,var(--color-accent)_16%,transparent)] text-[var(--color-red-400)]"
+          : "text-[var(--color-muted)] hover:bg-[var(--color-surface-2)] hover:text-[var(--color-text)]"
+      }`}
+    >
+      <Icon name={item.icon} size={16} weight={active ? "fill" : "duotone"} />
+      {item.label}
+    </Link>
+  );
+}
+
+/**
+ * Вертикальный список для боковой панели. Активный пункт отмечен заливкой
+ * и полоской слева — на тёмном фоне одной заливки мало, глаз её теряет.
+ */
+export function NavColumn({ items }: { items: NavItem[] }) {
+  return (
+    <nav className="flex flex-col gap-0.5">
+      {items.map((item) => (
+        <NavRow key={item.href} item={item} />
+      ))}
+    </nav>
+  );
+}
+
+function NavRow({ item }: { item: NavItem }) {
+  const active = useActive(item.href);
+  return (
+    <Link
+      href={item.href}
+      aria-current={active ? "page" : undefined}
+      className={`relative flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm transition-colors duration-150 ${
+        active
+          ? "bg-[color-mix(in_srgb,var(--color-accent)_28%,transparent)] text-[var(--color-sidebar-text)]"
+          : "text-[var(--color-sidebar-muted)] hover:bg-[var(--color-sidebar-2)] hover:text-[var(--color-sidebar-text)]"
+      }`}
+    >
+      {active && (
+        <span
+          aria-hidden="true"
+          className="absolute top-1/2 left-0 h-5 w-[3px] -translate-y-1/2 rounded-r-full"
+          style={{ background: "var(--color-red-400)" }}
+        />
+      )}
+      <Icon name={item.icon} size={18} weight={active ? "fill" : "duotone"} />
+      {item.label}
+    </Link>
   );
 }

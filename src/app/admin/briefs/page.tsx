@@ -24,7 +24,7 @@ export default async function BriefsPage() {
       <PageTitle title="Заявки бизнесов" />
 
       {rows.length === 0 ? (
-        <Empty emoji="☕" text="Новых заявок нет — всё разобрано" />
+        <Empty icon="inbox" text="Новых заявок нет — всё разобрано" />
       ) : (
         <div className="space-y-3">
           {rows.map((c) => (

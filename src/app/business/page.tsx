@@ -62,7 +62,7 @@ export default async function BusinessHome() {
 
       {campaigns.length === 0 ? (
         <Empty
-          emoji="✨"
+          icon="sparkle"
           text="Опишите задачу — дальше всё сделает агентство"
           action={
             <Link href="/business/campaigns/new" className="btn btn-primary">

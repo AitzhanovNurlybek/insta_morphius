@@ -104,7 +104,7 @@ export default async function AdminDashboard() {
       {rows.length === 0 ? (
         activated && (
           <Empty
-            emoji="🎉"
+            icon="trophy"
             text="Всё закрыто. Можно выдохнуть"
             action={
               <Link href="/admin/businesses" className="btn btn-primary">

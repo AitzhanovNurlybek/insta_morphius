@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { confirmCode } from "../actions";
 import { SubmitButton, Field } from "@/components/ui";
+import { Icon } from "@/components/icons";
 import { currentCreator } from "@/lib/creator-auth";
 
 export default async function CodePage({
@@ -18,7 +19,7 @@ export default async function CodePage({
     <div className="flex min-h-screen items-center justify-center px-4 py-10">
       <div className="w-full max-w-sm">
         <div className="mb-6 text-center">
-          <div className="mb-2 text-3xl">📲</div>
+          <span className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl border border-[var(--color-line)] bg-[var(--color-surface-2)] text-[var(--color-accent)]"><Icon name="send" size={22} /></span>
           <h1 className="t-title">Введите код</h1>
           <p className="mt-1 text-sm text-[var(--color-muted)]">
             {sent === "1"

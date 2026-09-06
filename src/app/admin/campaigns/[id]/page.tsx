@@ -11,7 +11,6 @@ import {
   CAMPAIGN_FLOW,
   CAMPAIGN_STATUS_LABEL,
   CITIES,
-  NICHE_EMOJI,
   NICHES,
   TASK_FLOW,
   TASK_STATUS_LABEL,
@@ -352,7 +351,7 @@ export default async function CampaignPage({
                           {c.nickname ?? c.full_name}
                         </div>
                         <div className="truncate text-xs text-[var(--color-muted)]">
-                          {c.city} · {c.niches.map((n) => `${NICHE_EMOJI[n] ?? ""} ${n}`).join(", ")}
+                          {c.city} · {c.niches.join(", ")}
                         </div>
                       </div>
                       <div className="hidden text-right text-xs sm:block">
@@ -423,7 +422,7 @@ export default async function CampaignPage({
         </div>
 
         {/* ── ПРАВАЯ КОЛОНКА ── */}
-        <aside className="min-w-0 space-y-5">
+        <aside id="campaign-side" className="min-w-0 space-y-5">
           <NextStep status={campaign.status}>
             {meta.next ? (
               <form action={setCampaignStatus.bind(null, campaign.id)}>

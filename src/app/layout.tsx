@@ -1,5 +1,26 @@
 import type { Metadata } from "next";
+import { Onest, Spectral } from "next/font/google";
 import "./globals.css";
+
+/**
+ * Шрифтовая пара вместо системного гротеска.
+ *
+ * Onest — интерфейсный, кириллица родная, а не приделанная.
+ * Spectral — засечный для заголовков и крупных цифр: он даёт продукту
+ * характер, которого нет ни у одного интерфейса, собранного по умолчанию.
+ */
+const onest = Onest({
+  subsets: ["latin", "cyrillic"],
+  variable: "--font-ui",
+  display: "swap",
+});
+
+const spectral = Spectral({
+  subsets: ["latin", "cyrillic"],
+  weight: ["500", "600", "700"],
+  variable: "--font-display",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "Creator Platform",
@@ -25,7 +46,7 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="ru" suppressHydrationWarning>
+    <html lang="ru" className={`${onest.variable} ${spectral.variable}`} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>

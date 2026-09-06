@@ -116,7 +116,7 @@ export default async function BusinessCampaignPage({
         </div>
 
         {tasks.length === 0 ? (
-          <Empty emoji="🔎" text="Агентство подбирает креаторов — скоро появятся здесь" />
+          <Empty icon="search" text="Агентство подбирает креаторов — скоро появятся здесь" />
         ) : (
           <div className="stagger grid gap-3 sm:grid-cols-2">
             {tasks.map((t) => {

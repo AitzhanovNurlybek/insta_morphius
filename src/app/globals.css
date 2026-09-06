@@ -19,12 +19,12 @@
      с багрянцем читается как больничный кафель. Тёмная тема осталась,
      переключается в шапке. */
 
-  --color-bg: #fbf6f5;
+  --color-bg: #fbf4f3;
   --color-surface: #ffffff;
-  --color-surface-2: #f6eeed;
-  --color-surface-3: #efe1e0;
-  --color-line: #ebdcda;
-  --color-line-strong: #d8c2c0;
+  --color-surface-2: #f6eae9;
+  --color-surface-3: #eddcda;
+  --color-line: #ead7d5;
+  --color-line-strong: #d6bcba;
 
   /* Текст */
   --color-text: #241417;
@@ -32,11 +32,11 @@
   --color-muted: #8a7175;
 
   /* Брендовый красный: на светлом нужен глубже, иначе не хватает контраста */
-  --color-wine: #f5e3e5;
+  --color-wine: #f2dcdf;
   --color-red-700: #8e1626;
-  --color-red-600: #a81730;
-  --color-accent: #c4203a;
-  --color-red-400: #b01c30;
+  --color-red-600: #8c1226;
+  --color-accent: #a8172e;
+  --color-red-400: #8c1226;
 
   /* Поддерживающие */
   --color-gold: #a9711a;
@@ -47,11 +47,18 @@
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
 
-  --font-sans: ui-sans-serif, system-ui, "Segoe UI", Roboto, Arial, sans-serif;
+  --font-sans: var(--font-ui), ui-sans-serif, system-ui, "Segoe UI", Roboto, Arial, sans-serif;
+  --font-serif: var(--font-display), Georgia, "Times New Roman", serif;
 
   /* Тени тёплые и мягкие: серая тень на тёплом фоне выглядит грязной */
   --shadow-card: 0 1px 2px rgba(80, 30, 35, 0.05), 0 6px 20px -10px rgba(80, 30, 35, 0.12);
   --shadow-lift: 0 2px 6px rgba(80, 30, 35, 0.08), 0 18px 40px -18px rgba(150, 30, 50, 0.25);
+
+  --color-sidebar: #1d0910;
+  --color-sidebar-2: #2a1018;
+  --color-sidebar-line: #3c1c25;
+  --color-sidebar-text: #f4e6e8;
+  --color-sidebar-muted: #b2939a;
 
   --radius-card: 18px;
 }
@@ -78,12 +85,18 @@
   --color-wine: #4a0f1a;
   --color-red-700: #8e1626;
   --color-red-600: #b01c30;
-  --color-accent: #d94059;
-  --color-red-400: #f0788a;
+  --color-accent: #c22a45;
+  --color-red-400: #ee6b80;
 
   --color-gold: #e0a458;
   --color-jade: #4fa383;
   --color-danger: #ff6b57;
+
+  --color-sidebar: #150710;
+  --color-sidebar-2: #1f0c15;
+  --color-sidebar-line: #33161f;
+  --color-sidebar-text: #f4e6e8;
+  --color-sidebar-muted: #a9878f;
 
   --shadow-card: 0 1px 2px rgba(10, 4, 6, 0.4), 0 8px 24px -12px rgba(10, 4, 6, 0.6);
   --shadow-lift: 0 2px 4px rgba(10, 4, 6, 0.4), 0 16px 40px -16px rgba(74, 15, 26, 0.7);
@@ -142,16 +155,18 @@ body {
 
 @layer components {
   .t-display {
-    font-size: clamp(1.75rem, 1.2rem + 1.6vw, 2.4rem);
-    line-height: 1.08;
-    letter-spacing: -0.022em;
+    font-family: var(--font-serif);
+    font-size: clamp(1.8rem, 1.2rem + 1.7vw, 2.6rem);
+    line-height: 1.06;
+    letter-spacing: -0.015em;
     font-weight: 600;
   }
 
   .t-title {
-    font-size: 1.25rem;
+    font-family: var(--font-serif);
+    font-size: 1.3rem;
     line-height: 1.2;
-    letter-spacing: -0.015em;
+    letter-spacing: -0.01em;
     font-weight: 600;
   }
 
@@ -165,7 +180,8 @@ body {
   }
 
   .t-num {
-    font-size: 1.75rem;
+    font-family: var(--font-serif);
+    font-size: 1.8rem;
     line-height: 1.1;
     letter-spacing: -0.02em;
     font-weight: 600;

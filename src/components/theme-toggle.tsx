@@ -16,7 +16,7 @@ function currentTheme(): "light" | "dark" {
  * откуда его читает CSS. При первом заходе тему берёт из настроек системы —
  * это делает скрипт в layout, чтобы страница не мигала светлым.
  */
-export function ThemeToggle() {
+export function ThemeToggle({ onDark = false }: { onDark?: boolean }) {
   const initial = useSyncExternalStore(noopSubscribe, currentTheme, () => "light" as const);
   const [theme, setTheme] = useState<"light" | "dark" | null>(null);
   const active = theme ?? initial;
@@ -36,7 +36,8 @@ export function ThemeToggle() {
     <button
       type="button"
       onClick={toggle}
-      className="btn btn-ghost btn-sm"
+      className={onDark ? "rounded-xl px-3 py-2 transition-colors" : "btn btn-ghost btn-sm"}
+      style={onDark ? { color: "var(--color-sidebar-muted)" } : undefined}
       aria-label={active === "dark" ? "Светлая тема" : "Тёмная тема"}
       title={active === "dark" ? "Светлая тема" : "Тёмная тема"}
     >

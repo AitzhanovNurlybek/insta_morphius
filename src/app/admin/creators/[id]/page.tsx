@@ -1,3 +1,4 @@
+import { NicheIcon } from "@/components/icons";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
@@ -9,7 +10,6 @@ import {
   updateCreator,
   uploadPortfolioFile,
 } from "../actions";
-import { NICHE_EMOJI } from "@/lib/constants";
 import { SITE_URL } from "@/lib/legal";
 import { compact, date, dateTime, money, priceRange } from "@/lib/format";
 import type { Campaign, CampaignCreator, Creator } from "@/lib/types";
@@ -76,7 +76,7 @@ export default async function CreatorPage({
         <span className="badge">{creator.city}</span>
         {creator.niches.map((n) => (
           <span key={n} className="badge">
-            {NICHE_EMOJI[n]} {n}
+            <NicheIcon niche={n} /> {n}
           </span>
         ))}
         <span className="badge">

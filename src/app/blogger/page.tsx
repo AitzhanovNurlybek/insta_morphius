@@ -22,7 +22,7 @@ export default async function BloggerLoginPage({
       <div className="grid items-center gap-10 lg:grid-cols-2">
         {/* Левая половина: зачем это блогеру */}
         <div>
-          <div className="mb-4 text-4xl">🎬</div>
+          <span className="mb-5 inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-[var(--color-line)] bg-[var(--color-surface-2)] text-[var(--color-accent)]"><Icon name="clapper" size={24} /></span>
           <h1 className="t-display mb-3">Съёмки для брендов Алматы</h1>
           <p className="mb-6 text-[var(--color-text-2)]">
             Заходите по нику в Instagram, смотрите свежие офферы и берёте те,
@@ -32,12 +32,12 @@ export default async function BloggerLoginPage({
 
           <ul className="mb-6 space-y-3">
             {[
-              { emoji: "📬", text: "Офферы приходят сами — не нужно писать брендам" },
-              { emoji: "💸", text: "Гонорар и сроки видны до отклика" },
-              { emoji: "🏆", text: "Чем больше съёмок, тем выше уровень и надбавка" },
+              { icon: "inbox", text: "Офферы приходят сами — не нужно писать брендам" },
+              { icon: "money", text: "Гонорар и сроки видны до отклика" },
+              { icon: "trophy", text: "Чем больше съёмок, тем выше уровень и надбавка" },
             ].map((item) => (
               <li key={item.text} className="flex items-start gap-3">
-                <span className="text-xl">{item.emoji}</span>
+                <Icon name={item.icon} size={18} className="mt-0.5 text-[var(--color-accent)]" />
                 <span className="text-sm text-[var(--color-text-2)]">{item.text}</span>
               </li>
             ))}

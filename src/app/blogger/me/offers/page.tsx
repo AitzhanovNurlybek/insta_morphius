@@ -3,9 +3,8 @@ import { currentCreator } from "@/lib/creator-auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { applyToOffer } from "../../actions";
 import { SubmitButton } from "@/components/ui";
-import { Icon } from "@/components/icons";
+import { Icon, NicheIcon } from "@/components/icons";
 import { Empty, PageTitle } from "@/components/shell";
-import { NICHE_EMOJI } from "@/lib/constants";
 import { levelOf } from "@/lib/gamification";
 import { creatorDashboard } from "@/lib/creator-stats";
 import { date, money } from "@/lib/format";
@@ -51,7 +50,7 @@ export default async function OffersPage({
 
       {applied && (
         <p className="note note-ok mb-5">
-          Отклик отправлен 🎉 Менеджер напишет вам в течение дня
+          Отклик отправлен. Менеджер напишет вам в течение дня
         </p>
       )}
 
@@ -62,7 +61,7 @@ export default async function OffersPage({
       )}
 
       {sorted.length === 0 ? (
-        <Empty emoji="📭" text="Пока нет открытых офферов. Загляните завтра" />
+        <Empty icon="inbox" text="Пока нет открытых офферов. Загляните завтра" />
       ) : (
         <div className="stagger grid gap-3 sm:grid-cols-2">
           {sorted.map((offer) => {
@@ -97,21 +96,21 @@ export default async function OffersPage({
 
                 {offer.perks && (
                   <p className="mb-3 flex items-start gap-2 text-sm">
-                    <span>🎁</span>
+                    <Icon name="gift" size={15} className="mt-0.5 text-[var(--color-jade)]" />
                     <span className="text-[var(--color-text-2)]">{offer.perks}</span>
                   </p>
                 )}
 
                 <div className="mb-4 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-[var(--color-muted)]">
-                  <span>📍 {offer.city}</span>
+                  <span className="flex items-center gap-1"><Icon name="pin" size={13} />{offer.city}</span>
                   {offer.niches.map((n) => (
-                    <span key={n}>
-                      {NICHE_EMOJI[n]} {n}
+                    <span key={n} className="flex items-center gap-1">
+                      <NicheIcon niche={n} /> {n}
                     </span>
                   ))}
-                  {offer.formats.length > 0 && <span>🎥 {offer.formats.join(", ")}</span>}
-                  {offer.deadline && <span>⏳ до {date(offer.deadline)}</span>}
-                  <span>👥 мест: {offer.slots}</span>
+                  {offer.formats.length > 0 && <span className="flex items-center gap-1"><Icon name="clapper" size={13} />{offer.formats.join(", ")}</span>}
+                  {offer.deadline && <span className="flex items-center gap-1"><Icon name="clock" size={13} />до {date(offer.deadline)}</span>}
+                  <span className="flex items-center gap-1"><Icon name="users" size={13} />мест: {offer.slots}</span>
                 </div>
 
                 <div className="mt-auto">
@@ -122,10 +121,10 @@ export default async function OffersPage({
                       }`}
                     >
                       {application.status === "accepted"
-                        ? "✅ Вас взяли"
+                        ? "Вас взяли"
                         : application.status === "declined"
                           ? "В этот раз не подошли"
-                          : "⏳ Отклик отправлен"}
+                          : "Отклик отправлен"}
                     </div>
                   ) : (
                     <form action={applyToOffer.bind(null, offer.id)}>

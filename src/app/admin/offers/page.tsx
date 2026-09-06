@@ -3,7 +3,7 @@ import { PageTitle, Empty } from "@/components/shell";
 import { Field, CheckboxGroup, SubmitButton } from "@/components/ui";
 import { Avatar } from "@/components/avatar";
 import { Icon } from "@/components/icons";
-import { CITIES, FORMATS, NICHES, NICHE_EMOJI } from "@/lib/constants";
+import { CITIES, FORMATS, NICHES } from "@/lib/constants";
 import { date, money } from "@/lib/format";
 import { closeOffer, createOffer, setApplicationStatus } from "./actions";
 import type { Creator, Offer, OfferApplication } from "@/lib/types";
@@ -100,7 +100,7 @@ export default async function OffersAdminPage({
       </details>
 
       {offers.length === 0 ? (
-        <Empty emoji="📣" text="Офферов пока нет. Создайте первый — блогеры увидят его сразу" />
+        <Empty icon="megaphone" text="Офферов пока нет. Создайте первый — блогеры увидят его сразу" />
       ) : (
         <div className="stagger space-y-3">
           {offers.map((offer) => {
@@ -143,9 +143,7 @@ export default async function OffersAdminPage({
                           <div className="min-w-0 flex-1">
                             <div className="text-sm font-medium">{name}</div>
                             <div className="text-xs text-[var(--color-muted)]">
-                              {(app.creators?.niches ?? [])
-                                .map((n) => `${NICHE_EMOJI[n] ?? ""} ${n}`)
-                                .join(", ")}
+                              {(app.creators?.niches ?? []).join(", ")}
                             </div>
                           </div>
 

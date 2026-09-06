@@ -4,9 +4,9 @@ import { currentCreator } from "@/lib/creator-auth";
 import { creatorDashboard } from "@/lib/creator-stats";
 import { badgesOf, levelOf } from "@/lib/gamification";
 import { AvatarPicker } from "@/components/avatar-picker";
-import { Icon } from "@/components/icons";
+import { Icon, NicheIcon } from "@/components/icons";
 import { Empty, SectionTitle } from "@/components/shell";
-import { TASK_STATUS_LABEL, NICHE_EMOJI } from "@/lib/constants";
+import { TASK_STATUS_LABEL } from "@/lib/constants";
 import { TASK_ICON } from "@/lib/funnel";
 import { compact, date, money, plural } from "@/lib/format";
 
@@ -34,7 +34,7 @@ export default async function BloggerCabinet() {
               <span>{creator.city}</span>
               {creator.niches.map((n) => (
                 <span key={n}>
-                  {NICHE_EMOJI[n]} {n}
+                  <NicheIcon niche={n} /> {n}
                 </span>
               ))}
               {creator.ig_followers && <span>{compact(creator.ig_followers)} подписчиков</span>}
@@ -78,14 +78,14 @@ export default async function BloggerCabinet() {
 
       {/* ── Цифры ── */}
       <div className="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <Tile emoji="🎬" label="Съёмок" value={String(stats.shoots)} />
-        <Tile emoji="💸" label="Заработано" value={money(stats.earned)} />
+        <Tile icon="clapper" label="Съёмок" value={String(stats.shoots)} />
+        <Tile icon="money" label="Заработано" value={money(stats.earned)} />
         <Tile
-          emoji="⭐"
+          icon="heart"
           label="Оценка работ"
           value={stats.rateQuality ? `${stats.rateQuality} из 5` : "—"}
         />
-        <Tile emoji="🤝" label="Брендов" value={String(stats.clients)} />
+        <Tile icon="building" label="Брендов" value={String(stats.clients)} />
       </div>
 
       {/* ── Значки ── */}
@@ -127,7 +127,7 @@ export default async function BloggerCabinet() {
 
       {active.length === 0 ? (
         <Empty
-          emoji="🍿"
+          icon="camera"
           text="Активных съёмок нет. Загляните в офферы — там есть работа на ближайшие дни"
           action={
             <Link href="/blogger/me/offers" className="btn btn-primary">
@@ -167,10 +167,10 @@ export default async function BloggerCabinet() {
   );
 }
 
-function Tile({ emoji, label, value }: { emoji: string; label: string; value: string }) {
+function Tile({ icon, label, value }: { icon: string; label: string; value: string }) {
   return (
     <div className="panel p-4">
-      <div className="mb-1 text-xl">{emoji}</div>
+      <div className="mb-2 text-[var(--color-accent)]"><Icon name={icon} size={20} /></div>
       <div className="t-num">{value}</div>
       <div className="mt-0.5 text-xs text-[var(--color-muted)]">{label}</div>
     </div>
