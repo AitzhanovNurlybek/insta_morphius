@@ -54,6 +54,8 @@ export type Creator = {
   instagram_last_synced_at: string | null;
   instagram_deletion_requested_at: string | null;
   connect_token: string;
+  avatar_emoji: string | null;
+  login_phone: string | null;
   data_source: DataSource;
   consent_data_processing: boolean;
   created_at: string;
@@ -138,4 +140,35 @@ export type StatusLogEntry = {
   to_status: CampaignStatus;
   changed_at: string;
   note: string | null;
+};
+
+export type OfferStatus = "open" | "closed";
+export type ApplicationStatus = "applied" | "accepted" | "declined";
+
+export type Offer = {
+  id: string;
+  business_id: string | null;
+  title: string;
+  brand: string;
+  description: string | null;
+  city: string;
+  niches: string[];
+  formats: string[];
+  pay_min: number;
+  pay_max: number;
+  shoot_days: number;
+  deadline: string | null;
+  slots: number;
+  perks: string | null;
+  status: OfferStatus;
+  created_at: string;
+};
+
+export type OfferApplication = {
+  id: string;
+  offer_id: string;
+  creator_id: string;
+  status: ApplicationStatus;
+  note: string | null;
+  created_at: string;
 };

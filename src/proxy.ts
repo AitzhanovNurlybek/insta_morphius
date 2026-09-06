@@ -12,6 +12,7 @@ const PUBLIC_PATHS = [
   "/terms",
   "/data-deletion",
   "/connect",
+  "/blogger",
   "/api/meta",
   "/api/instagram",
 ];

@@ -41,3 +41,16 @@ export function dateTime(value: string | null | undefined): string {
     minute: "2-digit",
   });
 }
+
+/**
+ * Русское склонение по числу: 1 съёмка, 2 съёмки, 5 съёмок.
+ * «1 съёмок» в интерфейсе читается как недоделка, даже если никто не жалуется.
+ */
+export function plural(count: number, forms: [string, string, string]): string {
+  const n = Math.abs(count) % 100;
+  const n1 = n % 10;
+  if (n > 10 && n < 20) return forms[2];
+  if (n1 > 1 && n1 < 5) return forms[1];
+  if (n1 === 1) return forms[0];
+  return forms[2];
+}

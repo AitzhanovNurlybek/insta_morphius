@@ -74,6 +74,8 @@ const creator = (
   instagram_last_synced_at: null,
   instagram_deletion_requested_at: null,
   connect_token: `demo-token-${id}`,
+  avatar_emoji: null,
+  login_phone: null,
   data_source: "manual",
   consent_data_processing: true,
   consent_at: iso(-30),
@@ -300,3 +302,104 @@ export const seedStatusLog: Row[] = [
 ];
 
 export const seedDeletionRequests: Row[] = [];
+
+// ─────────────────────────  ОФФЕРЫ ДЛЯ БЛОГЕРОВ  ─────────────────────────
+// Ставки взяты с рынка Алматы: съёмочный день у микроблогера — 10–15 тыс. ₸,
+// сверху обычно идёт бартер (еда, услуга, товар).
+
+const offer = (
+  id: string,
+  title: string,
+  brand: string,
+  description: string,
+  city: string,
+  niches: string[],
+  formats: string[],
+  payMin: number,
+  payMax: number,
+  days: number,
+  slots: number,
+  perks: string,
+  deadlineIn: number,
+): Row => ({
+  id,
+  business_id: null,
+  title,
+  brand,
+  description,
+  city,
+  niches,
+  formats,
+  pay_min: payMin,
+  pay_max: payMax,
+  shoot_days: days,
+  deadline: day(deadlineIn),
+  slots,
+  perks,
+  status: "open",
+  created_at: iso(-Math.round(deadlineIn / 3)),
+});
+
+export const seedOffers: Row[] = [
+  offer("of-1", "Съёмка завтраков в кофейне", "Кофейня Ошақ",
+    "Приходите к открытию, снимаете подачу и интерьер. Сценарий свободный — важно, чтобы было аппетитно.",
+    "Алматы", ["Food", "Lifestyle"], ["Reels", "Stories"], 12000, 15000, 1, 3,
+    "Завтрак и кофе за счёт заведения", 12),
+
+  offer("of-2", "Тест-драйв кроссовера", "AutoDom KZ",
+    "Полдня с машиной: город, смотровая, короткий рассказ про салон. Права обязательны.",
+    "Алматы", ["Auto", "Tech"], ["Reels"], 14000, 15000, 1, 2,
+    "Машина с полным баком на день", 20),
+
+  offer("of-3", "Уход за лицом: до и после", "Салон Aloe",
+    "Одна процедура, съёмка процесса и честный отзыв через неделю.",
+    "Алматы", ["Beauty", "Health"], ["Reels", "Stories"], 10000, 13000, 1, 4,
+    "Процедура бесплатно + скидка 30% подписчикам", 9),
+
+  offer("of-4", "Новая коллекция в примерочной", "Sadu Store",
+    "Три образа, съёмка в шоуруме. Одежду возвращаем после съёмки.",
+    "Алматы", ["Fashion", "Lifestyle"], ["Reels", "Post"], 12000, 15000, 1, 3,
+    "Один образ остаётся вам", 15),
+
+  offer("of-5", "День в фитнес-клубе", "Almaty Fit",
+    "Тренировка с тренером, съёмка зала и бассейна. Утро буднего дня.",
+    "Алматы", ["Sport", "Health"], ["Reels"], 10000, 12000, 1, 2,
+    "Месяц абонемента", 18),
+
+  offer("of-6", "Доставка еды: распаковка", "Qazaq Food",
+    "Заказ приезжает к вам домой, снимаете распаковку и первую ложку.",
+    "Алматы", ["Food", "Family"], ["Reels", "Stories"], 10000, 12000, 1, 5,
+    "Заказ на 15 000 ₸", 7),
+
+  offer("of-7", "Выходные в горах", "Shymbulak Stay",
+    "Два дня в отеле: подъёмник, виды, завтрак. Нужен минимум один Reels в день.",
+    "Алматы", ["Travel", "Lifestyle"], ["Reels", "Stories"], 13000, 15000, 2, 2,
+    "Проживание на двоих и подъёмник", 25),
+
+  offer("of-8", "Обзор наушников", "TechnoPoint",
+    "Съёмка дома, распаковка и три сценария использования.",
+    "Астана", ["Tech"], ["Reels", "Post"], 11000, 14000, 1, 2,
+    "Наушники остаются вам", 14),
+];
+
+export const seedOfferApplications: Row[] = [
+  {
+    id: "ap-1",
+    offer_id: "of-1",
+    creator_id: "cr-11",
+    status: "applied",
+    note: null,
+    created_at: iso(-2),
+  },
+  {
+    id: "ap-2",
+    offer_id: "of-3",
+    creator_id: "cr-7",
+    status: "accepted",
+    note: null,
+    created_at: iso(-4),
+  },
+];
+
+export const seedLoginCodes: Row[] = [];
+export const seedSessions: Row[] = [];

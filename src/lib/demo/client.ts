@@ -13,7 +13,11 @@ import {
   seedCampaigns,
   seedCreators,
   seedDeletionRequests,
+  seedLoginCodes,
+  seedOfferApplications,
+  seedOffers,
   seedProfiles,
+  seedSessions,
   seedStatusLog,
   type Row,
 } from "./seed";
@@ -42,6 +46,10 @@ function tables(): Tables {
       campaign_creators: empty ? [] : clone(seedCampaignCreators),
       campaign_status_log: empty ? [] : clone(seedStatusLog),
       data_deletion_requests: clone(seedDeletionRequests),
+      offers: empty ? [] : clone(seedOffers),
+      offer_applications: empty ? [] : clone(seedOfferApplications),
+      creator_login_codes: clone(seedLoginCodes),
+      creator_sessions: clone(seedSessions),
     };
   }
   return globalStore.__demoTables;
@@ -108,6 +116,8 @@ const DEFAULTS: Record<string, () => Row> = {
     instagram_deletion_requested_at: null,
     consent_data_processing: false,
     connect_token: randomUUID(),
+    avatar_emoji: null,
+    login_phone: null,
     updated_at: new Date().toISOString(),
   }),
   businesses: () => ({ city: "Алматы", owner_id: null }),
@@ -120,6 +130,9 @@ const DEFAULTS: Record<string, () => Row> = {
     rate_brief: null,
   }),
   data_deletion_requests: () => ({ source: "meta", completed_at: null }),
+  offers: () => ({ status: "open", niches: [], formats: [], shoot_days: 1, slots: 1, city: "Алматы" }),
+  offer_applications: () => ({ status: "applied", note: null }),
+  creator_login_codes: () => ({ attempts: 0, used_at: null }),
 };
 
 type RelDef = { table: string; fk: string; kind: "one" | "many" };
@@ -134,6 +147,11 @@ const RELATIONS: Record<string, Record<string, RelDef>> = {
     campaigns: { table: "campaigns", fk: "campaign_id", kind: "one" },
   },
   businesses: { campaigns: { table: "campaigns", fk: "business_id", kind: "many" } },
+  offer_applications: {
+    offers: { table: "offers", fk: "offer_id", kind: "one" },
+    creators: { table: "creators", fk: "creator_id", kind: "one" },
+  },
+  offers: { offer_applications: { table: "offer_applications", fk: "offer_id", kind: "many" } },
 };
 
 type RelNode = { name: string; inner: string };

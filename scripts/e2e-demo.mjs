@@ -162,6 +162,55 @@ for (const route of ["/privacy", "/terms", "/data-deletion", "/connect/demo-toke
 
 
 
+// 11b. Кабинет блогера: вход по коду, уровень, отклик на оффер
+await page.deleteCookie({ name: "demo_role", domain: "localhost", path: "/" });
+await page.goto(`${BASE}/blogger`, { waitUntil: "networkidle2" });
+await page.type('input[name="handle"]', "aika.almaty");
+await page.type('input[name="phone"]', "77001112233");
+await Promise.all([
+  page.waitForNavigation({ waitUntil: "networkidle2" }),
+  page.click("xpath=//button[contains(., 'Получить код')]"),
+]);
+
+const smsCode = await page.$eval(
+  "body",
+  (el) => (el.innerText.match(/код:\s*(\d{6})/) || [])[1],
+);
+check("код выдан", Boolean(smsCode));
+
+// Неверный код пускать не должен
+await page.type('input[name="code"]', "000000");
+await Promise.all([
+  page.waitForNavigation({ waitUntil: "networkidle2" }),
+  page.click("xpath=//button[contains(., 'Войти')]"),
+]);
+check(
+  "неверный код отклонён",
+  (await page.$eval("body", (e) => e.innerText)).includes("не подошёл"),
+);
+
+await page.type('input[name="code"]', smsCode);
+await Promise.all([
+  page.waitForNavigation({ waitUntil: "networkidle2" }),
+  page.click("xpath=//button[contains(., 'Войти')]"),
+]);
+check("блогер вошёл в кабинет", page.url().includes("/blogger/me"));
+
+const cabinetText = await page.$eval("body", (e) => e.innerText);
+check("виден уровень и значки", /Новичок|Уверенный|Профи|Звезда/.test(cabinetText) && cabinetText.includes("Первая съёмка"));
+
+await page.goto(`${BASE}/blogger/me/offers`, { waitUntil: "networkidle2" });
+const openBefore = await page.$$eval("xpath=//button[contains(., 'Откликнуться')]", (b) => b.length);
+await Promise.all([
+  page.waitForNavigation({ waitUntil: "networkidle2" }),
+  page.click("xpath=//button[contains(., 'Откликнуться')]"),
+]);
+const openAfter = await page.$$eval("xpath=//button[contains(., 'Откликнуться')]", (b) => b.length);
+check("отклик на оффер отправлен", openAfter === openBefore - 1, `${openBefore} → ${openAfter}`);
+
+await page.goto(`${BASE}/admin`, { waitUntil: "networkidle2" });
+check("блогера не пускает в админку", !page.url().includes("/admin"));
+
 // 12. Ничего не вылезает за экран телефона.
 // Проверка появилась не зря: на 390px уезжали карточка кампании и таблица
 // истории — глазами на десктопе это не видно вообще.
