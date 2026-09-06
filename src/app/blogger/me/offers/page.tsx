@@ -34,12 +34,12 @@ export default async function OffersPage({
 
   const bonus = levelOf(stats.shoots).level.bonus;
 
-  // Сначала то, что попадает в ниши блогера: остальное листать необязательно
+  // Сначала то, что попадает в ниши блогера: остальное листать необязательно.
+  // Оффер без ниши — для всех, а не «ни для кого»: иначе он уезжает в конец
+  // списка и его не видит никто.
   const mine = new Set(creator.niches);
-  const sorted = [...offers].sort((a, b) => {
-    const fit = (o: Offer) => (o.niches.some((n) => mine.has(n)) ? 0 : 1);
-    return fit(a) - fit(b);
-  });
+  const suits = (o: Offer) => o.niches.length === 0 || o.niches.some((n) => mine.has(n));
+  const sorted = [...offers].sort((a, b) => Number(suits(b)) - Number(suits(a)));
 
   return (
     <>
@@ -66,7 +66,7 @@ export default async function OffersPage({
         <div className="stagger grid gap-3 sm:grid-cols-2">
           {sorted.map((offer) => {
             const application = applications.get(offer.id);
-            const fits = offer.niches.some((n) => mine.has(n));
+            const fits = suits(offer);
 
             return (
               <article key={offer.id} className="panel flex flex-col p-5">
@@ -75,7 +75,11 @@ export default async function OffersPage({
                     <div className="text-xs text-[var(--color-muted)]">{offer.brand}</div>
                     <h2 className="mt-0.5 leading-snug font-medium">{offer.title}</h2>
                   </div>
-                  {fits && <span className="badge badge-accent shrink-0">Ваша тема</span>}
+                  {fits && (
+                    <span className="badge badge-accent shrink-0">
+                      {offer.niches.length === 0 ? "Для всех" : "Ваша тема"}
+                    </span>
+                  )}
                 </div>
 
                 {/* Деньги — главное, ради чего открывают карточку */}

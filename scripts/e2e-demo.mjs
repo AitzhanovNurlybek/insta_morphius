@@ -65,14 +65,21 @@ const { value: next, label } = await page.$eval('#campaign-side select[name="sta
   const other = [...el.options].find((o) => o.value !== el.value);
   return { value: other.value, label: other.textContent.trim() };
 });
+// Кнопку берём внутри формы с селектом: первая submit-кнопка панели — это
+// «следующий шаг», она уводит воронку совсем не туда, куда просит тест
+const APPLY = '#campaign-side details form button[type="submit"]';
 await page.select('#campaign-side select[name="status"]', next);
 await Promise.all([
   page.waitForNavigation({ waitUntil: "networkidle2" }),
-  page.click('#campaign-side button[type="submit"]'),
+  page.click(APPLY),
 ]);
-const body = await page.$eval("body", (el) => el.innerText);
+// Читаем состояние после перезагрузки: сразу после отправки страница успевает
+// отрисоваться старым payload, и проверка ловила бы момент, а не результат
+await page.reload({ waitUntil: "networkidle2" });
+await openAll();
+const applied = await page.$eval('#campaign-side select[name="status"]', (el) => el.value);
 const after = await page.$$eval("#campaign-side li", (els) => els.length);
-check("смена статуса применилась", body.includes(label), `на «${label}»`);
+check("смена статуса применилась", applied === next, `на «${label}»`);
 check("запись попала в журнал", after === before + 1, `было ${before}, стало ${after}`);
 
 // 2. Подбор креатора в кампанию
@@ -210,6 +217,78 @@ check("отклик на оффер отправлен", openAfter === openBefor
 
 await page.goto(`${BASE}/admin`, { waitUntil: "networkidle2" });
 check("блогера не пускает в админку", !page.url().includes("/admin"));
+
+// 11c. Круг замкнут: оффер из кампании → отклик блогера → задача в кампании
+await browser.setCookie({ name: "demo_role", value: "admin", domain: "localhost", path: "/" });
+await page.goto(`${BASE}/admin/campaigns/cm-3`, { waitUntil: "networkidle2" });
+await Promise.all([
+  page.waitForNavigation({ waitUntil: "networkidle2" }),
+  page.click("xpath=//button[contains(., 'Опубликовать оффер')]"),
+]);
+check("оффер создан из кампании", page.url().includes("/admin/offers"));
+
+// Блогер откликается на свежий оффер
+await page.deleteCookie({ name: "demo_role", domain: "localhost", path: "/" });
+await page.goto(`${BASE}/blogger/me/offers`, { waitUntil: "networkidle2" });
+await Promise.all([
+  page.waitForNavigation({ waitUntil: "networkidle2" }),
+  page.click("xpath=//article[contains(., 'Тест-драйв новой модели')]//button[contains(., 'Откликнуться')]"),
+]);
+check("блогер откликнулся на новый оффер", page.url().includes("applied=1"));
+
+// Агентство берёт — и креатор появляется в самой кампании
+await browser.setCookie({ name: "demo_role", value: "admin", domain: "localhost", path: "/" });
+await page.goto(`${BASE}/admin/offers`, { waitUntil: "networkidle2" });
+await page.$$eval("details", (ds) => ds.forEach((d) => (d.open = true)));
+await new Promise((r) => setTimeout(r, 200));
+const teamBefore = await page.$$eval('form input[name="task"]', (e) => e.length);
+await Promise.all([
+  page.waitForNavigation({ waitUntil: "networkidle2" }),
+  page.click("xpath=//details[contains(., 'Тест-драйв новой модели')]//button[contains(., 'Взять')]"),
+]);
+await page.goto(`${BASE}/admin/campaigns/cm-3`, { waitUntil: "networkidle2" });
+const teamAfter = await page.$$eval('form input[name="task"]', (e) => e.length);
+check("принятый отклик стал задачей кампании", teamAfter > 0, `задач: ${teamAfter}`);
+void teamBefore;
+
+// 11d. Клиент не видит чужую кампанию: cm-2 принадлежит другому бизнесу.
+// В демо-режиме RLS нет, поэтому владельца проверяет сама страница.
+await browser.setCookie({ name: "demo_role", value: "business", domain: "localhost", path: "/" });
+await page.goto(`${BASE}/business/campaigns/cm-2`, { waitUntil: "networkidle2" });
+check(
+  "чужая кампания клиенту не открывается",
+  (await page.$eval("body", (e) => e.innerText)).includes("Такой страницы нет"),
+);
+
+// 11e. Клиент согласовывает подбор — воронка едет дальше.
+// Стадию выставляем сами: проверка не должна зависеть от того,
+// что с этой кампанией сделали предыдущие шаги.
+await browser.setCookie({ name: "demo_role", value: "admin", domain: "localhost", path: "/" });
+await page.goto(`${BASE}/admin/campaigns/cm-5`, { waitUntil: "networkidle2" });
+await openAll();
+await page.select('#campaign-side select[name="status"]', "creators_selected");
+await Promise.all([
+  page.waitForNavigation({ waitUntil: "networkidle2" }),
+  page.click(APPLY),
+]);
+
+await browser.setCookie({ name: "demo_role", value: "business", domain: "localhost", path: "/" });
+await page.goto(`${BASE}/business/campaigns/cm-5`, { waitUntil: "networkidle2" });
+const canDecide = (await page.$eval("body", (e) => e.innerText)).includes("Всё подходит");
+check("клиенту показана развилка по подбору", canDecide);
+if (canDecide) {
+  await Promise.all([
+    page.waitForNavigation({ waitUntil: "networkidle2" }),
+    page.click("xpath=//button[contains(., 'Всё подходит')]"),
+  ]);
+  const afterApprove = await page.$eval("body", (e) => e.innerText);
+  check("после согласования начались съёмки", afterApprove.includes("Идут съёмки"));
+}
+
+// 11f. Служебные страницы не белый лист
+await browser.setCookie({ name: "demo_role", value: "admin", domain: "localhost", path: "/" });
+await page.goto(`${BASE}/admin/campaigns/nope-not-here`, { waitUntil: "networkidle2" });
+check("страница «не найдено» оформлена", (await page.$eval("body", (e) => e.innerText)).includes("Такой страницы нет"));
 
 // 12. Ничего не вылезает за экран телефона.
 // Проверка появилась не зря: на 390px уезжали карточка кампании и таблица

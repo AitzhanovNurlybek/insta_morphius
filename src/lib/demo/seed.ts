@@ -324,6 +324,7 @@ const offer = (
 ): Row => ({
   id,
   business_id: null,
+  campaign_id: null,
   title,
   brand,
   description,

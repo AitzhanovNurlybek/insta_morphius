@@ -4,7 +4,9 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { requireBusiness } from "@/lib/auth";
-import type { AudienceGender } from "@/lib/types";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { setStatus } from "@/lib/campaign-status";
+import type { AudienceGender, CampaignStatus } from "@/lib/types";
 
 export async function saveBusiness(formData: FormData) {
   const { profile, business } = await requireBusiness();
@@ -92,4 +94,56 @@ export async function createCampaign(formData: FormData) {
   revalidatePath("/business");
   revalidatePath("/admin/briefs");
   redirect(`/business/campaigns/${data!.id}`);
+}
+
+/**
+ * Ответ клиента на подбор и на черновики.
+ *
+ * Идёт через служебный клиент с проверкой владельца прямо здесь: RLS
+ * разрешает клиенту править только свой бриф и только до взятия в работу,
+ * а двигать воронку он должен на двух стадиях. Само действие и есть граница
+ * доступа — так же устроен кабинет блогера.
+ */
+type ClientAction = "approve_creators" | "replace_creators" | "accept_drafts" | "request_edits";
+
+const ALLOWED: Record<ClientAction, { from: CampaignStatus; to: CampaignStatus }> = {
+  approve_creators: { from: "creators_selected", to: "filming" },
+  replace_creators: { from: "creators_selected", to: "brief_approved" },
+  accept_drafts: { from: "client_review", to: "published" },
+  request_edits: { from: "client_review", to: "editing" },
+};
+
+export async function respondToCampaign(
+  campaignId: string,
+  action: ClientAction,
+  formData?: FormData,
+) {
+  const { business } = await requireBusiness();
+  if (!business) redirect("/business/profile");
+
+  const admin = createAdminClient();
+
+  const { data } = await admin
+    .from("campaigns")
+    .select("id, business_id, status")
+    .eq("id", campaignId)
+    .maybeSingle();
+
+  const campaign = data as { business_id: string; status: CampaignStatus } | null;
+  const rule = ALLOWED[action];
+
+  // Чужую кампанию и неподходящую стадию просто игнорируем: показывать
+  // клиенту разбор наших правил незачем.
+  if (!campaign || campaign.business_id !== business.id || campaign.status !== rule.from) {
+    redirect(`/business/campaigns/${campaignId}`);
+  }
+
+  const note = String(formData?.get("note") ?? "").trim();
+  await setStatus(admin, campaignId, rule.to, note || null);
+
+  revalidatePath(`/business/campaigns/${campaignId}`);
+  revalidatePath("/business");
+  revalidatePath(`/admin/campaigns/${campaignId}`);
+  revalidatePath("/admin");
+  redirect(`/business/campaigns/${campaignId}?done=${action}`);
 }

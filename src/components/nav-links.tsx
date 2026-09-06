@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Icon } from "@/components/icons";
 
-export type NavItem = { href: string; label: string; icon: string };
+export type NavItem = { href: string; label: string; icon: string; count?: number };
 
 function useActive(href: string) {
   const pathname = usePathname();
@@ -39,6 +39,7 @@ function NavChip({ item }: { item: NavItem }) {
     >
       <Icon name={item.icon} size={16} weight={active ? "fill" : "duotone"} />
       {item.label}
+      {item.count ? <Counter value={item.count} /> : null}
     </Link>
   );
 }
@@ -78,6 +79,25 @@ function NavRow({ item }: { item: NavItem }) {
       )}
       <Icon name={item.icon} size={18} weight={active ? "fill" : "duotone"} />
       {item.label}
+      {item.count ? <Counter value={item.count} className="ml-auto" /> : null}
     </Link>
+  );
+}
+
+/**
+ * Счётчик у раздела: сколько там ждёт ответа. Без него человек не знает,
+ * что заглядывать нужно именно туда, и заходит наугад.
+ */
+function Counter({ value, className = "" }: { value: number; className?: string }) {
+  return (
+    <span
+      className={`tabular rounded-full px-1.5 py-0.5 text-[0.68rem] leading-none font-semibold ${className}`}
+      style={{
+        background: "var(--color-accent)",
+        color: "#fff",
+      }}
+    >
+      {value}
+    </span>
   );
 }

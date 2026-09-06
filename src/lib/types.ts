@@ -148,6 +148,7 @@ export type ApplicationStatus = "applied" | "accepted" | "declined";
 export type Offer = {
   id: string;
   business_id: string | null;
+  campaign_id: string | null;
   title: string;
   brand: string;
   description: string | null;

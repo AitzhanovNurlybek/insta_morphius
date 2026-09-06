@@ -6,6 +6,8 @@ import { PageTitle, Empty } from "@/components/shell";
 import { CreatorCard } from "@/components/creator-card";
 import { Icon } from "@/components/icons";
 import { PhaseTrack } from "@/components/funnel-ui";
+import { SubmitButton } from "@/components/ui";
+import { respondToCampaign } from "../../actions";
 import { AUDIENCE_GENDER_LABEL, CAMPAIGN_STATUS_LABEL, TASK_STATUS_LABEL } from "@/lib/constants";
 import { TASK_ICON } from "@/lib/funnel";
 import { date, dateTime, money } from "@/lib/format";
@@ -13,21 +15,26 @@ import type { Campaign, CampaignCreator, CreatorPublic, StatusLogEntry } from "@
 
 export default async function BusinessCampaignPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ done?: string }>;
 }) {
   const { id } = await params;
-  await requireBusiness();
+  const { done } = await searchParams;
+  const { business } = await requireBusiness();
   const supabase = await createClient();
 
-  // RLS сама отсечёт чужие кампании — отдельная проверка владельца не нужна.
   const { data: campaignRow } = await supabase
     .from("campaigns")
     .select("*")
     .eq("id", id)
     .maybeSingle();
 
-  if (!campaignRow) notFound();
+  // На боевой базе чужую кампанию отсекает RLS, но полагаться только на неё
+  // нельзя: в демо-режиме RLS нет, и по прямой ссылке открывалась чужая
+  // кампания — с кнопками решения, которые сервер потом всё равно отклонял.
+  if (!campaignRow || campaignRow.business_id !== business?.id) notFound();
   const campaign = campaignRow as Campaign;
 
   const [{ data: taskRows }, { data: logRows }] = await Promise.all([
@@ -67,12 +74,47 @@ export default async function BusinessCampaignPage({
         <PhaseTrack status={campaign.status} audience="client" />
       </section>
 
+      {done && (
+        <p className="note note-ok mb-5">
+          {done === "approve_creators"
+            ? "Отлично, передали агентству — съёмки начинаются"
+            : done === "accept_drafts"
+              ? "Работы приняты. Агентство подготовит отчёт"
+              : "Замечание отправлено. Агентство свяжется с вами"}
+        </p>
+      )}
+
+      {/* Слово клиента: две стадии воронки ждут именно его ответа */}
+      {campaign.status === "creators_selected" && (
+        <Decision
+          title="Посмотрите, кого мы предлагаем"
+          hint="Если состав устраивает — запускаем съёмки. Если нет, напишите, что поменять."
+          okLabel="Всё подходит, начинайте"
+          backLabel="Хочу других"
+          okAction={respondToCampaign.bind(null, campaign.id, "approve_creators")}
+          backAction={respondToCampaign.bind(null, campaign.id, "replace_creators")}
+          placeholder="Например: нужен кто-то с мужской аудиторией"
+        />
+      )}
+
+      {campaign.status === "client_review" && (
+        <Decision
+          title="Черновики у вас на согласовании"
+          hint="Принимаете — креаторы публикуют. Нужны правки — опишите их одним сообщением."
+          okLabel="Принять работы"
+          backLabel="Нужны правки"
+          okAction={respondToCampaign.bind(null, campaign.id, "accept_drafts")}
+          backAction={respondToCampaign.bind(null, campaign.id, "request_edits")}
+          placeholder="Например: в первом ролике убрать музыку"
+        />
+      )}
+
       {/* Отчёт наверху: если он готов, это главное, зачем клиент сюда зашёл */}
       {hasReport && (
         <section className="panel mb-5 p-5">
           <div className="mb-3 flex items-center gap-2">
             <Icon name="trophy" size={16} className="text-[var(--color-jade)]" />
-            <h2 className="t-section">Итоги кампании 🎉</h2>
+            <h2 className="t-section">Итоги кампании</h2>
           </div>
 
           {campaign.report_text && (
@@ -230,6 +272,11 @@ export default async function BusinessCampaignPage({
                   <div className="text-xs text-[var(--color-muted)]">
                     {dateTime(entry.changed_at)}
                   </div>
+                  {entry.note && (
+                    <p className="mt-1 rounded-lg bg-[var(--color-surface-2)] px-2.5 py-1.5 text-xs">
+                      {entry.note}
+                    </p>
+                  )}
                 </li>
               ))}
             </ol>
@@ -246,5 +293,55 @@ function Row({ label, value }: { label: string; value: string }) {
       <span className="shrink-0 text-[var(--color-muted)]">{label}:</span>
       <span>{value}</span>
     </div>
+  );
+}
+
+/**
+ * Развилка для клиента: одна ясная кнопка «да» и одна «нужны правки»
+ * с полем для замечания. Замечание ложится в историю кампании,
+ * чтобы агентство видело причину возврата, а не гадало.
+ */
+function Decision({
+  title,
+  hint,
+  okLabel,
+  backLabel,
+  okAction,
+  backAction,
+  placeholder,
+}: {
+  title: string;
+  hint: string;
+  okLabel: string;
+  backLabel: string;
+  okAction: () => Promise<void>;
+  backAction: (formData: FormData) => Promise<void>;
+  placeholder: string;
+}) {
+  return (
+    <section className="panel mb-5 border-[color-mix(in_srgb,var(--color-accent)_35%,var(--color-line))] p-5">
+      <h2 className="t-title">{title}</h2>
+      <p className="mt-1 mb-4 text-sm text-[var(--color-muted)]">{hint}</p>
+
+      <div className="flex flex-wrap items-start gap-3">
+        <form action={okAction}>
+          <SubmitButton className="btn btn-primary">{okLabel}</SubmitButton>
+        </form>
+
+        <details className="min-w-64 flex-1">
+          <summary className="btn btn-ghost cursor-pointer">{backLabel}</summary>
+          <form action={backAction} className="mt-3 space-y-2">
+            <textarea
+              className="textarea"
+              name="note"
+              rows={3}
+              required
+              placeholder={placeholder}
+            />
+            <SubmitButton className="btn">Отправить замечание</SubmitButton>
+          </form>
+        </details>
+      </div>
+    </section>
   );
 }

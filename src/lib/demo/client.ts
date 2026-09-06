@@ -130,7 +130,7 @@ const DEFAULTS: Record<string, () => Row> = {
     rate_brief: null,
   }),
   data_deletion_requests: () => ({ source: "meta", completed_at: null }),
-  offers: () => ({ status: "open", niches: [], formats: [], shoot_days: 1, slots: 1, city: "Алматы" }),
+  offers: () => ({ status: "open", niches: [], formats: [], shoot_days: 1, slots: 1, city: "Алматы", business_id: null, campaign_id: null, perks: null, description: null, deadline: null }),
   offer_applications: () => ({ status: "applied", note: null }),
   creator_login_codes: () => ({ attempts: 0, used_at: null }),
 };

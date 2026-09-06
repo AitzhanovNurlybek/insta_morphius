@@ -22,6 +22,7 @@ import {
   detachCreator,
   saveReport,
   setCampaignStatus,
+  publishOffer,
   updateTask,
   uploadReportFile,
 } from "../actions";
@@ -454,6 +455,20 @@ export default async function CampaignPage({
           </NextStep>
 
           <section className="panel p-5">
+            <h2 className="t-section mb-3">Найти блогеров</h2>
+            <p className="mb-3 text-sm text-[var(--color-muted)]">
+              Опубликуйте оффер — он появится в кабинетах блогеров. Кого возьмёте
+              из откликов, тот сразу попадёт в эту кампанию.
+            </p>
+            <form action={publishOffer.bind(null, campaign.id)}>
+              <SubmitButton className="btn w-full">
+                <Icon name="megaphone" size={15} />
+                Опубликовать оффер
+              </SubmitButton>
+            </form>
+          </section>
+
+          <section className="panel p-5">
             <h2 className="t-section mb-3">История</h2>
             {log.length === 0 ? (
               <Empty text="Пока пусто" />
@@ -465,6 +480,11 @@ export default async function CampaignPage({
                     <div className="text-xs text-[var(--color-muted)]">
                       {dateTime(entry.changed_at)}
                     </div>
+                    {entry.note && (
+                      <p className="mt-1 rounded-lg bg-[var(--color-surface-2)] px-2.5 py-1.5 text-xs">
+                        {entry.note}
+                      </p>
+                    )}
                   </li>
                 ))}
               </ol>

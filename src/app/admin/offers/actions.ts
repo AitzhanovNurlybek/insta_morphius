@@ -45,6 +45,45 @@ export async function setApplicationStatus(applicationId: string, status: Applic
 
   await supabase.from("offer_applications").update({ status }).eq("id", applicationId);
 
+  // Взяли блогера — он сразу становится частью кампании, из которой
+  // вырос оффер. Иначе агентству пришлось бы прикреплять его руками
+  // во втором месте, и половина откликов терялась бы по дороге.
+  if (status === "accepted") {
+    const { data } = await supabase
+      .from("offer_applications")
+      .select("creator_id, offers(campaign_id, title, pay_max, deadline)")
+      .eq("id", applicationId)
+      .maybeSingle();
+
+    const application = data as
+      | {
+          creator_id: string;
+          offers: {
+            campaign_id: string | null;
+            title: string;
+            pay_max: number;
+            deadline: string | null;
+          } | null;
+        }
+      | null;
+
+    const campaignId = application?.offers?.campaign_id;
+
+    if (campaignId && application) {
+      await supabase.from("campaign_creators").upsert(
+        {
+          campaign_id: campaignId,
+          creator_id: application.creator_id,
+          task: application.offers?.title ?? null,
+          fee: application.offers?.pay_max ?? null,
+          deadline: application.offers?.deadline ?? null,
+        },
+        { onConflict: "campaign_id,creator_id", ignoreDuplicates: true },
+      );
+      revalidatePath(`/admin/campaigns/${campaignId}`);
+    }
+  }
+
   revalidatePath("/admin/offers");
 }
 

@@ -143,3 +143,56 @@ export async function saveReport(campaignId: string, formData: FormData) {
   // Отчёт — длинный текст, человеку нужно подтверждение, что он сохранён
   redirect(`/admin/campaigns/${campaignId}?saved=report`);
 }
+
+/**
+ * Публикация оффера из кампании — то, чем замыкается круг:
+ * бриф клиента превращается в предложение, которое видят блогеры,
+ * а принятый отклик вернётся в эту же кампанию задачей.
+ */
+export async function publishOffer(campaignId: string) {
+  await requireAdmin();
+  const supabase = await createClient();
+
+  const { data } = await supabase
+    .from("campaigns")
+    .select("*, businesses(name)")
+    .eq("id", campaignId)
+    .maybeSingle();
+
+  const campaign = data as
+    | {
+        title: string;
+        goal: string | null;
+        formats: string[];
+        audience_city: string | null;
+        creators_needed: number | null;
+        ends_on: string | null;
+        businesses: { name: string } | null;
+      }
+    | null;
+
+  if (!campaign) {
+    redirect(`/admin/campaigns/${campaignId}?error=${encodeURIComponent("Кампания не найдена")}`);
+  }
+
+  const { error } = await supabase.from("offers").insert({
+    campaign_id: campaignId,
+    title: campaign.title,
+    brand: campaign.businesses?.name ?? "Клиент агентства",
+    description: campaign.goal,
+    city: campaign.audience_city ?? "Алматы",
+    formats: campaign.formats,
+    // Ставка за съёмочный день — рыночная вилка; агентство поправит при нужде
+    pay_min: 10000,
+    pay_max: 15000,
+    slots: campaign.creators_needed ?? 1,
+    deadline: campaign.ends_on,
+  });
+
+  if (error) {
+    redirect(`/admin/campaigns/${campaignId}?error=${encodeURIComponent(error.message)}`);
+  }
+
+  revalidatePath("/admin/offers");
+  redirect("/admin/offers?saved=1");
+}
