@@ -1,30 +1,28 @@
 import type { Metadata } from "next";
-import { Onest, Spectral } from "next/font/google";
+import { Inter } from "next/font/google";
 import "./globals.css";
 
 /**
- * Шрифтовая пара вместо системного гротеска.
+ * Один шрифт на весь интерфейс — Inter.
  *
- * Onest — интерфейсный, кириллица родная, а не приделанная.
- * Spectral — засечный для заголовков и крупных цифр: он даёт продукту
- * характер, которого нет ни у одного интерфейса, собранного по умолчанию.
+ * Apple советует брать системный шрифт: в нём уже настроены оптические размеры
+ * и трекинг. Но системный на Windows — это Segoe UI, на Android — Roboto,
+ * и один экран выглядит тремя разными продуктами. Inter — ближайший к SF Pro
+ * гротеск с настоящей кириллицей, поэтому он и стоит везде.
+ *
+ * Засечный Spectral убран: пара «гротеск + антиква» даёт журнальный вид,
+ * а не интерфейсный. Иерархия теперь строится весом, кеглем и трекингом —
+ * ровно так, как это делает Apple.
  */
-const onest = Onest({
+const inter = Inter({
   subsets: ["latin", "cyrillic"],
   variable: "--font-ui",
   display: "swap",
 });
 
-const spectral = Spectral({
-  subsets: ["latin", "cyrillic"],
-  weight: ["500", "600", "700"],
-  variable: "--font-display",
-  display: "swap",
-});
-
 export const metadata: Metadata = {
   title: "Creator Platform",
-  description: "Платформа агентства: база креаторов, брифы и кампании",
+  description: "Digital-отдел продвижения: съёмки, монтаж, креаторы и таргет в одном месте",
   // На этапе MVP в поиске не светимся (п.8 ТЗ)
   robots: { index: false, follow: false },
 };
@@ -46,7 +44,7 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="ru" className={`${onest.variable} ${spectral.variable}`} suppressHydrationWarning>
+    <html lang="ru" className={inter.variable} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>

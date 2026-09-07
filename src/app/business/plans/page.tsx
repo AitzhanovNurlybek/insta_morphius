@@ -84,8 +84,10 @@ export default async function PlansPage({
     <>
       <PageTitle
         title="Тарифы"
-        hint="Съёмки, монтаж и таргет одним счётом — без найма команды"
+        hint="Продвижение под ключ: приезжаем, снимаем, монтируем, ведём соцсети и рекламу"
       />
+
+      <WhatWeDo />
 
       {done && (
         <p className="note note-ok mb-5">
@@ -157,6 +159,42 @@ export default async function PlansPage({
         Рекламный бюджет уходит в Meta целиком — комиссию с него мы не берём.
       </p>
     </>
+  );
+}
+
+/**
+ * Что закрывает отдел. Четыре роли вместо абзаца: человек считывает,
+ * что искать мобилографа, монтажёра, креаторов и таргетолога по отдельности
+ * не придётся, — а это и есть причина брать пакет.
+ */
+function WhatWeDo() {
+  const roles = [
+    { icon: "camera", title: "Мобилограф", text: "Приезжает и снимает" },
+    { icon: "users", title: "UGC-креаторы", text: "Снимают от своего лица" },
+    { icon: "scissors", title: "Монтажёр", text: "Reels и TikTok под ключ" },
+    { icon: "megaphone", title: "Таргетолог", text: "Реклама и отчёт по заявкам" },
+  ];
+
+  return (
+    <section className="panel mb-6 p-5">
+      <p className="mb-4 text-sm text-[var(--color-muted)]">
+        Четыре специалиста, которых не нужно искать и нанимать по отдельности.
+        Мы отвечаем за продвижение целиком и ежемесячно показываем результат.
+      </p>
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {roles.map((r) => (
+          <div key={r.title} className="flex items-start gap-3">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-[var(--color-line)] bg-[var(--color-surface-2)] text-[var(--color-red-400)]">
+              <Icon name={r.icon} size={17} />
+            </span>
+            <div className="min-w-0">
+              <div className="font-medium">{r.title}</div>
+              <div className="text-xs text-[var(--color-muted)]">{r.text}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
   );
 }
 

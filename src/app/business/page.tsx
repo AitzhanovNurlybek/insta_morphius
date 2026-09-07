@@ -48,12 +48,12 @@ export default async function BusinessHome() {
   return (
     <>
       <PageTitle
-        title="Мои кампании"
+        title="Мои съёмки"
         hint="На каком шаге каждая работа"
         action={
-          <Link href="/business/campaigns/new" className="btn btn-primary">
-            <Icon name="plus" size={15} />
-            Создать бриф
+          <Link href="/business/plans" className="btn btn-ghost">
+            <Icon name="package" size={15} />
+            Тарифы
           </Link>
         }
       />
@@ -62,11 +62,12 @@ export default async function BusinessHome() {
 
       {campaigns.length === 0 ? (
         <Empty
-          icon="sparkle"
-          text="Опишите задачу — дальше всё сделает агентство"
+          icon="package"
+          text="Съёмки появятся здесь, как только подключим пакет. Выберите тариф — остальное сделаем мы"
           action={
-            <Link href="/business/campaigns/new" className="btn btn-primary">
-              Создать первый бриф
+            <Link href="/business/plans" className="btn btn-primary">
+              Выбрать тариф
+              <Icon name="arrowRight" size={15} />
             </Link>
           }
         />

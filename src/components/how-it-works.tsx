@@ -7,16 +7,16 @@ type Step = { icon: string; title: string; text: string };
 
 const STEPS: Record<"agency" | "client", Step[]> = {
   agency: [
-    { icon: "inbox", title: "Заявка", text: "Клиент присылает бриф" },
+    { icon: "inbox", title: "Заявка", text: "Клиент выбирает тариф" },
     { icon: "users", title: "Подбор", text: "Отмечаете креаторов галочками" },
     { icon: "camera", title: "Производство", text: "Ведёте съёмку и монтаж" },
     { icon: "trophy", title: "Отчёт", text: "Пишете итоги, клиент их видит" },
   ],
   client: [
-    { icon: "edit", title: "Бриф", text: "Опишите задачу и бюджет" },
-    { icon: "users", title: "Предложение", text: "Агентство подберёт креаторов" },
-    { icon: "camera", title: "Съёмки", text: "Видно, на каком шаге работа" },
-    { icon: "trophy", title: "Отчёт", text: "Получите итоги с цифрами" },
+    { icon: "package", title: "Тариф", text: "Выбираете пакет или собираете свой" },
+    { icon: "users", title: "Команда", text: "Подбираем креаторов и мобилографа" },
+    { icon: "camera", title: "Съёмки", text: "Снимаем, монтируем, публикуем" },
+    { icon: "trophy", title: "Отчёт", text: "Показываем охваты и заявки" },
   ],
 };
 

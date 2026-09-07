@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import type { SubscriptionStatus } from "@/lib/types";
+import type { Subscription, SubscriptionItem, SubscriptionStatus } from "@/lib/types";
 
 const NEXT_STATUS: Record<string, SubscriptionStatus[]> = {
   pending: ["active", "cancelled"],
@@ -48,6 +48,7 @@ export async function setSubscriptionStatus(
     ends.setMonth(ends.getMonth() + 1);
     patch.starts_on = today.toISOString().slice(0, 10);
     patch.ends_on = ends.toISOString().slice(0, 10);
+    patch.campaign_id = await openCampaign(subscriptionId, patch.starts_on as string, patch.ends_on as string);
   }
 
   const note = String(formData?.get("comment") ?? "").trim();
@@ -58,6 +59,68 @@ export async function setSubscriptionStatus(
   revalidatePath("/admin/finance");
   revalidatePath("/business/plans");
   redirect("/admin/finance");
+}
+
+/**
+ * Подтверждённая подписка заводит съёмки сама.
+ *
+ * Раньше вход в воронку был через бриф, который писал клиент. Теперь бриф —
+ * это сам пакет: в нём уже сказано, сколько съёмок, сколько роликов и на какой
+ * бюджет. Заставлять человека пересказывать словами то, что он только что
+ * купил, — лишний шаг, на котором работа и застревала.
+ *
+ * Кампания открывается сразу на стадии «бриф согласован»: согласовывать нечего,
+ * условия приняты обеими сторонами в момент подтверждения.
+ */
+async function openCampaign(
+  subscriptionId: string,
+  startsOn: string,
+  endsOn: string,
+): Promise<string | null> {
+  const admin = createAdminClient();
+
+  const { data } = await admin
+    .from("subscriptions")
+    .select("*, subscription_items(*)")
+    .eq("id", subscriptionId)
+    .maybeSingle();
+
+  const sub = data as
+    | (Subscription & { subscription_items: SubscriptionItem[] | null })
+    | null;
+  if (!sub || sub.campaign_id) return sub?.campaign_id ?? null;
+
+  const items = sub.subscription_items ?? [];
+  const qtyOf = (code: string) =>
+    Number(items.find((i) => i.service_code === code)?.qty ?? 0);
+
+  const shoots = qtyOf("creator_day") + qtyOf("mobilographer_day");
+  const clips = qtyOf("editing");
+
+  const { data: created } = await admin
+    .from("campaigns")
+    .insert({
+      business_id: sub.business_id,
+      title: `${sub.title} · ${new Date(startsOn).toLocaleDateString("ru-RU", { month: "long", year: "numeric" })}`,
+      goal:
+        `Пакет «${sub.title}»: ${shoots} съёмочных дней, ${clips} роликов в монтаж` +
+        (qtyOf("ad_budget") ? `, рекламный бюджет ${qtyOf("ad_budget").toLocaleString("ru-RU")} ₸` : ""),
+      budget: Number(sub.price),
+      formats: ["Reels", "Stories"],
+      creators_needed: qtyOf("creator_day") || null,
+      starts_on: startsOn,
+      ends_on: endsOn,
+      status: "brief_approved",
+    })
+    .select("id")
+    .single();
+
+  const campaignId = (created as { id: string } | null)?.id ?? null;
+  if (campaignId) {
+    revalidatePath("/admin/campaigns");
+    revalidatePath("/business");
+  }
+  return campaignId;
 }
 
 /** Правка себестоимости услуги. Меняет только будущие расчёты: подписки хранят снимок. */

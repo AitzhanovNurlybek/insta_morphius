@@ -117,12 +117,12 @@ check("новый креатор сохранён", (await page.$eval("body", (e
 
 // 5b. Подсказка «как это работает» закрывается и не возвращается
 await page.goto(`${BASE}/admin`, { waitUntil: "networkidle2" });
-const hintShown = (await page.$eval("body", (e) => e.innerText)).includes("КАК ЭТО РАБОТАЕТ");
+const hintShown = (await page.$eval("body", (e) => e.innerText)).includes("Как это работает");
 await page.click("xpath=//button[contains(., 'Понятно')]");
 await new Promise((r) => setTimeout(r, 200));
-const hintGone = !(await page.$eval("body", (e) => e.innerText)).includes("КАК ЭТО РАБОТАЕТ");
+const hintGone = !(await page.$eval("body", (e) => e.innerText)).includes("Как это работает");
 await page.reload({ waitUntil: "networkidle2" });
-const stillGone = !(await page.$eval("body", (e) => e.innerText)).includes("КАК ЭТО РАБОТАЕТ");
+const stillGone = !(await page.$eval("body", (e) => e.innerText)).includes("Как это работает");
 check("подсказка показана новому пользователю", hintShown);
 check("подсказка закрывается и не возвращается", hintGone && stillGone);
 
@@ -134,22 +134,48 @@ check("клиент не видит внутренний тир", !clientText.in
 check("клиент не видит заметки агентства", !clientText.includes("Лучшая по кафе"));
 check("клиент видит отчёт", clientText.includes("суммарный охват"));
 
-// 7. Клиент создаёт бриф
+// 7. Брифов больше нет: продукт работает по пакетам, а не по описаниям задачи
 await page.goto(`${BASE}/business/campaigns/new`, { waitUntil: "networkidle2" });
-await page.type('input[name="title"]', "Проверочная кампания");
-await page.type('input[name="budget"]', "300000");
+check(
+  "страницы брифа больше нет",
+  (await page.$eval("body", (e) => e.innerText)).includes("Такой страницы нет"),
+);
+
+// 8. Полный вход в воронку: клиент берёт тариф, агентство подтверждает,
+// съёмки заводятся сами. Это то место, где раньше стоял бриф.
+await page.goto(`${BASE}/business/plans`, { waitUntil: "networkidle2" });
+if ((await page.$eval("body", (e) => e.innerText)).includes("Отозвать заявку")) {
+  await Promise.all([
+    page.waitForNavigation({ waitUntil: "networkidle2" }),
+    page.click("xpath=//button[contains(., 'Отозвать заявку')]"),
+  ]);
+}
 await Promise.all([
   page.waitForNavigation({ waitUntil: "networkidle2" }),
-  page.click("xpath=//button[contains(., 'Отправить заявку')]"),
+  page.click("xpath=//section[contains(., 'START')]//button[contains(., 'Оставить заявку')]"),
 ]);
-const briefText = await page.$eval("body", (e) => e.innerText);
-check("бриф создан и открылся", briefText.includes("Проверочная кампания"));
-check("новый бриф в статусе «Новая заявка»", briefText.includes("Новая заявка"));
+check(
+  "клиент оформил тариф",
+  (await page.$eval("body", (e) => e.innerText)).includes("Заявка у агентства"),
+);
 
-// 8. Заявка видна агентству
 await browser.setCookie({ name: "demo_role", value: "admin", domain: "localhost", path: "/" });
-await page.goto(`${BASE}/admin/briefs`, { waitUntil: "networkidle2" });
-check("заявка дошла до агентства", (await page.$eval("body", (e) => e.innerText)).includes("Проверочная кампания"));
+await page.goto(`${BASE}/admin/finance`, { waitUntil: "networkidle2" });
+await Promise.all([
+  page.waitForNavigation({ waitUntil: "networkidle2" }),
+  page.click("xpath=//button[contains(., 'Подтвердить')]"),
+]);
+
+await page.goto(`${BASE}/admin/campaigns`, { waitUntil: "networkidle2" });
+const board = await page.$eval("body", (e) => e.innerText);
+check("подтверждённая подписка завела съёмки", board.includes("START ·"), "кампания на доске");
+
+await browser.setCookie({ name: "demo_role", value: "business", domain: "localhost", path: "/" });
+await page.goto(`${BASE}/business`, { waitUntil: "networkidle2" });
+check(
+  "клиент видит свою кампанию по пакету",
+  (await page.$eval("body", (e) => e.innerText)).includes("START ·"),
+);
 
 // 9. Чужой раздел закрыт
 await browser.setCookie({ name: "demo_role", value: "business", domain: "localhost", path: "/" });

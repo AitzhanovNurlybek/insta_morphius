@@ -228,14 +228,7 @@ export default async function BusinessCampaignPage({
 
       <div className="grid gap-5 lg:grid-cols-2">
         <section className="panel p-5">
-          <div className="mb-3 flex items-baseline justify-between gap-3">
-            <h2 className="t-section">Бриф</h2>
-            {campaign.status === "new_request" && (
-              <Link href={`/business/campaigns/${campaign.id}/edit`} className="link-accent text-sm">
-                Изменить
-              </Link>
-            )}
-          </div>
+          <h2 className="t-section mb-3">Условия</h2>
           {campaign.goal && <p className="mb-4 text-sm">{campaign.goal}</p>}
           <div className="grid gap-y-2 text-sm">
             <Row label="Бюджет" value={money(campaign.budget)} />

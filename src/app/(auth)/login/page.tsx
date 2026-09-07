@@ -18,7 +18,7 @@ export default async function LoginPage({
         <div className="mb-7 text-center">
           <Logo className="text-lg" />
           <p className="mt-1 text-sm text-[var(--color-muted)]">
-            Кабинет агентства инфлюенс-маркетинга
+            Digital-отдел продвижения бизнеса
           </p>
         </div>
 
@@ -46,8 +46,12 @@ export default async function LoginPage({
             </div>
 
             <p className="hairline pt-3 text-xs text-[var(--color-muted)]">
-              Агентство ведёт базу креаторов и кампании. Клиент оставляет бриф
-              и следит за своей кампанией — попробуйте оба входа.
+              Агентство ведёт базу креаторов, съёмки и деньги. Клиент выбирает
+              тариф и следит за работой. Блогер — отдельный вход на{" "}
+              <Link href="/blogger" className="link-accent">
+                /blogger
+              </Link>
+              .
             </p>
           </div>
         ) : (

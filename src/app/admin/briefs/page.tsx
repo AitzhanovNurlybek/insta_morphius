@@ -21,10 +21,16 @@ export default async function BriefsPage() {
 
   return (
     <>
-      <PageTitle title="Заявки бизнесов" />
+      <PageTitle
+        title="Заявки бизнесов"
+        hint="Кампании, заведённые вручную. Заявки по тарифам приходят в раздел «Деньги»"
+      />
 
       {rows.length === 0 ? (
-        <Empty icon="inbox" text="Новых заявок нет — всё разобрано" />
+        <Empty
+          icon="inbox"
+          text="Пусто — и это норма: клиенты берут тариф, и съёмки заводятся сами при подтверждении подписки"
+        />
       ) : (
         <div className="space-y-3">
           {rows.map((c) => (

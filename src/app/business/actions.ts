@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { requireBusiness } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { setStatus } from "@/lib/campaign-status";
-import type { AudienceGender, CampaignStatus } from "@/lib/types";
+import type { CampaignStatus } from "@/lib/types";
 
 export async function saveBusiness(formData: FormData) {
   const { profile, business } = await requireBusiness();
@@ -37,64 +37,14 @@ export async function saveBusiness(formData: FormData) {
   redirect("/business");
 }
 
-/** Поля брифа, общие для создания и правки. */
-function briefPayload(formData: FormData) {
-  const budget = String(formData.get("budget") ?? "").replace(/\s/g, "");
-  const needed = String(formData.get("creators_needed") ?? "");
-
-  return {
-    title: String(formData.get("title") ?? "").trim(),
-    goal: String(formData.get("goal") ?? "").trim() || null,
-    budget: budget ? Number.parseInt(budget, 10) : null,
-    audience_age: String(formData.get("audience_age") ?? "").trim() || null,
-    audience_gender: String(formData.get("audience_gender") ?? "any") as AudienceGender,
-    audience_city: String(formData.get("audience_city") ?? "").trim() || null,
-    formats: formData.getAll("formats").map(String),
-    creators_needed: needed ? Number.parseInt(needed, 10) : null,
-    starts_on: String(formData.get("starts_on") ?? "") || null,
-    ends_on: String(formData.get("ends_on") ?? "") || null,
-  };
-}
-
-/** Правка брифа доступна, пока агентство не взяло его в работу — это же условие стоит в RLS. */
-export async function updateCampaign(campaignId: string, formData: FormData) {
-  await requireBusiness();
-  const supabase = await createClient();
-
-  const { error } = await supabase
-    .from("campaigns")
-    .update(briefPayload(formData))
-    .eq("id", campaignId);
-
-  if (error) {
-    redirect(`/business/campaigns/${campaignId}/edit?error=${encodeURIComponent(error.message)}`);
-  }
-
-  revalidatePath(`/business/campaigns/${campaignId}`);
-  revalidatePath("/business");
-  redirect(`/business/campaigns/${campaignId}`);
-}
-
-export async function createCampaign(formData: FormData) {
-  const { business } = await requireBusiness();
-  if (!business) redirect("/business/profile");
-
-  const supabase = await createClient();
-
-  const { data, error } = await supabase
-    .from("campaigns")
-    .insert({ business_id: business.id, ...briefPayload(formData) })
-    .select("id")
-    .single();
-
-  if (error) {
-    redirect(`/business/campaigns/new?error=${encodeURIComponent(error.message)}`);
-  }
-
-  revalidatePath("/business");
-  revalidatePath("/admin/briefs");
-  redirect(`/business/campaigns/${data!.id}`);
-}
+/*
+ * Брифов клиент больше не пишет.
+ *
+ * Продукт работает по пакетам: клиент выбирает тариф или собирает свой,
+ * а съёмки заводит агентство, когда подтверждает подписку. Форма брифа
+ * спрашивала то, что теперь известно из пакета, и заставляла человека
+ * описывать словами работу, которую он уже купил.
+ */
 
 /**
  * Ответ клиента на подбор и на черновики.
