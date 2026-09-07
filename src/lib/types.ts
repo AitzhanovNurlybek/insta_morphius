@@ -195,6 +195,7 @@ export type Service = {
   unit_forms: string[];
   unit_cost: number;
   markup_exempt: boolean;
+  derived_from: string[];
   percent_of: string | null;
   percent: number | null;
   min_qty: number;
@@ -205,7 +206,7 @@ export type Service = {
   active: boolean;
 };
 
-export type PackageItemPublic = { name: string; unit: string; qty: number };
+export type PackageItemPublic = { code: string; name: string; unit: string; qty: number };
 
 export type PackagePublic = {
   id: string;

@@ -13,6 +13,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import {
   costLines,
   publicPrice,
+  resolveQty,
   totalCost,
   unitPrice,
   type CostLine,
@@ -47,6 +48,7 @@ const toCost = (s: Service): ServiceCost => ({
   unit: s.unit,
   unit_cost: Number(s.unit_cost),
   markup_exempt: Boolean(s.markup_exempt),
+  derived_from: s.derived_from ?? [],
   percent_of: s.percent_of,
   percent: s.percent === null ? null : Number(s.percent),
 });
@@ -67,6 +69,7 @@ const toPublic = (s: Service, markupPercent: number): ServicePublic => ({
       : s.percent_of
         ? Number((Number(s.percent) * (1 + markupPercent / 100)).toFixed(2))
         : Number(s.percent),
+  derived_from: s.derived_from ?? [],
   min_qty: s.min_qty,
   max_qty: s.max_qty,
   step: s.step,
@@ -91,23 +94,28 @@ export type Quote = {
 export function quote(services: Service[], qty: Qty, markupPercent: number): Quote {
   const filled: Qty = { ...qty };
   for (const s of services) {
-    if (!s.in_builder && !s.percent_of) filled[s.code] = Math.max(s.min_qty, filled[s.code] ?? 1);
+    if (!s.in_builder && !s.percent_of && !s.derived_from?.length) {
+      filled[s.code] = Math.max(s.min_qty, filled[s.code] ?? 1);
+    }
   }
 
   const shown = services.map((s) => toPublic(s, markupPercent));
+  // Выводимые количества (монтаж) считаем сразу: строки подписки должны
+  // содержать то же число, что видел человек на экране.
+  const resolved = resolveQty(shown, filled);
 
   // Цена строки считается по той же витрине, что видит браузер, — иначе
   // человек согласится на одну сумму, а в подписке окажется другая.
   const linePrices = new Map<string, number>();
   for (const s of shown.filter((x) => !x.percent_of)) {
-    linePrices.set(s.code, Math.max(0, Math.round(filled[s.code] ?? 0)) * s.unit_price);
+    linePrices.set(s.code, Math.max(0, Math.round(resolved[s.code] ?? 0)) * s.unit_price);
   }
   for (const s of shown.filter((x) => x.percent_of)) {
     const from = linePrices.get(s.percent_of as string) ?? 0;
     linePrices.set(s.code, Math.round((from * (s.percent ?? 0)) / 100));
   }
 
-  const lines: QuoteLine[] = costLines(services.map(toCost), filled).map((l) => ({
+  const lines: QuoteLine[] = costLines(services.map(toCost), resolved).map((l) => ({
     ...l,
     line_price: linePrices.get(l.code) ?? 0,
   }));
@@ -115,7 +123,7 @@ export function quote(services: Service[], qty: Qty, markupPercent: number): Quo
   return {
     lines,
     cost: totalCost(lines),
-    price: publicPrice(shown, filled),
+    price: publicPrice(shown, resolved),
     markupPercent,
   };
 }

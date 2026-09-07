@@ -411,7 +411,7 @@ export const seedSessions: Row[] = [];
 // работы, а не только больший счёт.
 
 export const seedPricingSettings: Row[] = [
-  { id: true, custom_markup_percent: 15, agency_share_percent: 22, currency: "₸" },
+  { id: true, custom_markup_percent: 35, agency_share_percent: 22, currency: "₸" },
 ];
 
 const service = (
@@ -432,6 +432,7 @@ const service = (
   unit_forms,
   unit_cost,
   markup_exempt: false,
+  derived_from: [],
   percent_of: null,
   percent: null,
   min_qty: 0,
@@ -453,9 +454,10 @@ export const seedServices: Row[] = [
     "Наш мобилограф снимает интерьер, продукт, процесс",
     "смена", ["смена", "смены", "смен"], 15000, 20, { max_qty: 20 }),
 
-  service("editing", "Монтаж ролика",
-    "Сборка, субтитры, музыка, адаптация под Reels и TikTok",
-    "ролик", ["ролик", "ролика", "роликов"], 5000, 30, { max_qty: 40 }),
+  service("editing", "Монтаж роликов",
+    "По одному ролику на каждую съёмку: сборка, субтитры, музыка, адаптация под Reels и TikTok",
+    "ролик", ["ролик", "ролика", "роликов"], 5000, 30,
+    { max_qty: 60, derived_from: ["creator_day", "mobilographer_day"] }),
 
   service("ad_budget", "Рекламный бюджет",
     "Деньги, которые уходят напрямую в Meta Ads — мы на них не зарабатываем",
@@ -479,7 +481,7 @@ export const seedPackages: Row[] = [
     name: "START",
     tagline: "Попробовать, не рискуя бюджетом",
     description:
-      "Четыре съёмочных дня, четыре ролика и первый таргет. Хватает, чтобы понять, работает ли формат на вашей аудитории.",
+      "Шесть роликов за месяц: четыре съёмочных дня с блогером и две смены мобилографа. Монтаж всех роликов включён.",
     period: "month",
     markup_percent: 12,
     price_override: 180000,
@@ -495,7 +497,7 @@ export const seedPackages: Row[] = [
     name: "GROWTH",
     tagline: "Регулярный поток контента",
     description:
-      "Девять съёмочных дней и восемь роликов в месяц: лента не пустеет, таргет крутится на свежих креативах.",
+      "Двенадцать роликов за месяц. Лента не пустеет, таргет крутится на свежих креативах, монтаж всех съёмок включён.",
     period: "month",
     markup_percent: 12,
     price_override: 300000,
@@ -511,7 +513,7 @@ export const seedPackages: Row[] = [
     name: "PERFORMANCE",
     tagline: "Максимум охвата и тестов",
     description:
-      "Двадцать съёмочных дней и двенадцать роликов: хватает на несколько связок креативов и постоянные тесты.",
+      "Двадцать четыре ролика за месяц: хватает на несколько связок креативов и постоянные тесты. Монтаж всех съёмок включён.",
     period: "month",
     markup_percent: 12,
     price_override: 500000,
@@ -532,22 +534,22 @@ const packItem = (pkg: string, code: string, qty: number): Row => ({
 
 export const seedPackageItems: Row[] = [
   packItem("start", "creator_day", 4),
-  packItem("start", "mobilographer_day", 3),
-  packItem("start", "editing", 4),
+  packItem("start", "mobilographer_day", 2),
+  packItem("start", "editing", 6),
   packItem("start", "ad_budget", 45000),
   packItem("start", "targeting", 1),
   packItem("start", "tools", 1),
 
   packItem("growth", "creator_day", 9),
   packItem("growth", "mobilographer_day", 3),
-  packItem("growth", "editing", 8),
+  packItem("growth", "editing", 12),
   packItem("growth", "ad_budget", 45000),
   packItem("growth", "targeting", 1),
   packItem("growth", "tools", 1),
 
   packItem("performance", "creator_day", 20),
-  packItem("performance", "mobilographer_day", 3),
-  packItem("performance", "editing", 12),
+  packItem("performance", "mobilographer_day", 4),
+  packItem("performance", "editing", 24),
   packItem("performance", "ad_budget", 45000),
   packItem("performance", "targeting", 1),
   packItem("performance", "tools", 1),
@@ -557,7 +559,7 @@ export const seedPackageItems: Row[] = [
 // вручную набранные суммы разъезжаются с составом пакетов при первой же правке
 // цены, и демо начинает показывать арифметику, которой не бывает.
 
-const CUSTOM_MARKUP = 15;
+const CUSTOM_MARKUP = 35;
 const byCode = new Map(seedServices.map((s) => [s.code as string, s]));
 
 const unitPriceOf = (code: string, markup: number): number => {

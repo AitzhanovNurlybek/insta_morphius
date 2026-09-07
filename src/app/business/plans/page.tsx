@@ -4,8 +4,7 @@ import { PageTitle } from "@/components/shell";
 import { Icon } from "@/components/icons";
 import { SubmitButton } from "@/components/ui";
 import { PackageBuilder } from "@/components/package-builder";
-import { loadServices, loadSettings } from "@/lib/packages";
-import { publicServices } from "@/lib/packages";
+import { loadServices, loadSettings, packageQty, publicServices, quote } from "@/lib/packages";
 import { qtyLabel, SUBSCRIPTION_STATUS_LABEL, SUBSCRIPTION_STATUS_TONE } from "@/lib/pricing";
 import { date, money } from "@/lib/format";
 import { cancelSubscription, orderCustom, orderPackage } from "./actions";
@@ -54,8 +53,19 @@ export default async function PlansPage({
   ]);
 
   const packages = (packageRows ?? []) as PackagePublic[];
+  const markup = Number(settings.custom_markup_percent);
   // Витрину услуг собираем на сервере: в браузер уходят только цены.
-  const shown = publicServices(services, Number(settings.custom_markup_percent));
+  const shown = publicServices(services, markup);
+
+  // Сколько стоило бы собрать тот же состав в конструкторе. Считается тем же
+  // кодом, что и настоящая сборка, — цифра на витрине не выдуманная,
+  // клиент может повторить её руками и получить ровно столько же.
+  const priced = await Promise.all(
+    packages.map(async (p) => ({
+      pkg: p,
+      diy: quote(services, await packageQty(p.id), markup).price,
+    })),
+  );
 
   // Показываем неразобранную заявку, если она есть, иначе действующий пакет:
   // человеку важнее «что я только что отправил», чем «что уже идёт».
@@ -127,12 +137,21 @@ export default async function PlansPage({
       )}
 
       <div className="stagger mb-6 grid gap-4 lg:grid-cols-3">
-        {packages.map((p) => (
-          <PackageCard key={p.id} pkg={p} />
+        {priced.map(({ pkg, diy }) => (
+          <PackageCard key={pkg.id} pkg={pkg} diy={diy} />
         ))}
       </div>
 
-      <PackageBuilder services={shown} action={orderCustom} />
+      <PackageBuilder
+        services={shown}
+        action={orderCustom}
+        packages={packages.map((p) => ({
+          code: p.code,
+          name: p.name,
+          price: p.price,
+          qty: Object.fromEntries((p.items ?? []).map((i) => [i.code, i.qty])),
+        }))}
+      />
 
       <p className="mt-4 text-xs text-[var(--color-muted)]">
         Рекламный бюджет уходит в Meta целиком — комиссию с него мы не берём.
@@ -141,8 +160,9 @@ export default async function PlansPage({
   );
 }
 
-function PackageCard({ pkg }: { pkg: PackagePublic }) {
+function PackageCard({ pkg, diy }: { pkg: PackagePublic; diy: number }) {
   const items = pkg.items ?? [];
+  const saving = diy - pkg.price;
 
   return (
     <section
@@ -158,17 +178,33 @@ function PackageCard({ pkg }: { pkg: PackagePublic }) {
       {pkg.tagline && <p className="text-sm text-[var(--color-muted)]">{pkg.tagline}</p>}
 
       <div className="t-display mt-4 leading-none">{money(pkg.price)}</div>
-      <div className="mb-4 text-xs text-[var(--color-muted)]">в месяц</div>
+      <div className="text-xs text-[var(--color-muted)]">в месяц</div>
 
-      <ul className="mb-4 space-y-1.5 text-sm">
+      {saving > 0 && (
+        <p className="mt-3 mb-4 flex flex-wrap items-baseline gap-x-2 rounded-xl bg-[color-mix(in_srgb,var(--color-jade)_10%,var(--color-surface))] px-3 py-2 text-xs">
+          <span className="text-[var(--color-muted)]">
+            собрать то же самое —{" "}
+            <s className="tabular">{money(diy)}</s>
+          </span>
+          <b className="text-[var(--color-jade)]">выгода {money(saving)}</b>
+        </p>
+      )}
+
+      <ul className={`mb-4 space-y-1.5 text-sm ${saving > 0 ? "" : "mt-4"}`}>
         {items.map((i) => (
-          <li key={i.name} className="flex items-start gap-2">
+          <li key={i.code} className="flex items-start gap-2">
             <Icon name="check" size={14} className="mt-0.5 shrink-0 text-[var(--color-jade)]" />
-            <span>
-              {i.name}
-              {" — "}
-              <b className="tabular whitespace-nowrap">{qtyLabel(i.unit, i.qty)}</b>
-            </span>
+            {i.code === "editing" ? (
+              <span>
+                Монтаж всех роликов — <b>включён</b>
+              </span>
+            ) : (
+              <span>
+                {i.name}
+                {" — "}
+                <b className="tabular whitespace-nowrap">{qtyLabel(i.unit, i.qty)}</b>
+              </span>
+            )}
           </li>
         ))}
       </ul>

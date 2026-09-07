@@ -18,9 +18,29 @@ export type ServiceCost = {
   unit: string;
   unit_cost: number;
   markup_exempt: boolean;
+  derived_from: string[];
   percent_of: string | null;
   percent: number | null;
 };
+
+/**
+ * Количества, которые считаются от других: монтаж — по ролику на каждую съёмку.
+ *
+ * Правило приходит из данных (`services.derived_from`) и применяется и в браузере,
+ * и на сервере. Если его продублировать в компоненте, цена на экране разойдётся
+ * со счётом при первой же правке состава.
+ */
+export function resolveQty(
+  services: { code: string; derived_from?: string[] }[],
+  qty: Qty,
+): Qty {
+  const out: Qty = { ...qty };
+  for (const s of services) {
+    const from = s.derived_from ?? [];
+    if (from.length) out[s.code] = from.reduce((sum, code) => sum + (out[code] ?? 0), 0);
+  }
+  return out;
+}
 
 /**
  * Цена единицы услуги. Повторяет формулу вьюхи service_public из миграции 0006 —
@@ -44,6 +64,7 @@ export type ServicePublic = {
   unit_price: number;
   percent_of: string | null;
   percent: number | null;
+  derived_from: string[];
   min_qty: number;
   max_qty: number;
   step: number;
@@ -72,8 +93,9 @@ export const roundPrice = (value: number) => Math.ceil(value / ROUND_TO) * ROUND
  * Себестоимость сборки. Процентные статьи (таргетолог = 30% бюджета)
  * считаются вторым проходом — иначе результат зависел бы от порядка строк.
  */
-export function costLines(services: ServiceCost[], qty: Qty): CostLine[] {
+export function costLines(services: ServiceCost[], input: Qty): CostLine[] {
   const base = new Map<string, number>();
+  const qty = resolveQty(services, input);
 
   const plain = services
     .filter((s) => !s.percent_of)
@@ -135,8 +157,9 @@ export function margin(price: number, cost: number, agencySharePercent = 22): Ma
  * себестоимость в браузер не попадает вообще, поэтому конструктор
  * может пересчитываться на каждый щелчок без запроса к серверу.
  */
-export function publicPrice(services: ServicePublic[], qty: Qty): number {
+export function publicPrice(services: ServicePublic[], input: Qty): number {
   const base = new Map<string, number>();
+  const qty = resolveQty(services, input);
 
   let sum = 0;
   for (const s of services.filter((x) => !x.percent_of)) {

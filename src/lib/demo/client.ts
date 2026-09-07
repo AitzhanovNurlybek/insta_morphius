@@ -117,6 +117,7 @@ function servicePublic(): Row[] {
           : s.percent_of
             ? Number((Number(s.percent) * (1 + markup / 100)).toFixed(2))
             : Number(s.percent),
+      derived_from: s.derived_from ?? [],
       min_qty: s.min_qty,
       max_qty: s.max_qty,
       step: s.step,
@@ -165,7 +166,12 @@ function packagePublic(): Row[] {
           .map((i) => ({ service: byId.get(i.service_id), qty: i.qty }))
           .filter((x) => x.service?.in_builder)
           .sort((a, b) => Number(a.service?.sort) - Number(b.service?.sort))
-          .map((x) => ({ name: x.service?.name, unit: x.service?.unit, qty: x.qty })),
+          .map((x) => ({
+            code: x.service?.code,
+            name: x.service?.name,
+            unit: x.service?.unit,
+            qty: x.qty,
+          })),
       };
     });
 }

@@ -306,6 +306,22 @@ const leaked = ["unit_cost", "line_cost", "markup_percent", "себестоим�
 );
 check("себестоимость не утекает клиенту", leaked.length === 0, leaked.join(", "));
 
+// Витрина обещает, что готовый пакет выгоднее сборки. Обещание проверяемое:
+// «собрать то же самое» считается тем же кодом, что и настоящая сборка.
+const cards = await page.$$eval("section.panel", (els) =>
+  els.map((e) => e.innerText).filter((t) => t.includes("собрать то же самое")),
+);
+const savings = cards.map((t) => Number((t.match(/выгода ([\d\s]+)/) ?? [])[1]?.replace(/\D/g, "") ?? 0));
+check(
+  "готовый пакет выгоднее своей сборки",
+  savings.length === 3 && savings.every((v) => v > 0),
+  savings.join(" / "),
+);
+check(
+  "монтаж в пакете подан как включённый",
+  cards.every((t) => t.includes("Монтаж всех роликов — включён")),
+);
+
 const priceBefore = await page.$eval("form .t-display", (e) => e.innerText);
 await page.click("xpath=(//button[text()='+'])[1]");
 await new Promise((r) => setTimeout(r, 150));

@@ -31,7 +31,7 @@ DEMO_EMPTY=1 npm run dev
 1. https://supabase.com → New project. Регион — ближайший (`ap-southeast-1` Сингапур
    или `eu-central-1`), пароль базы сохрани в менеджер паролей.
 2. SQL Editor → New query → вставь **целиком** `supabase/migrations/0001_init.sql` → Run.
-3. Тем же способом `0002_rls.sql`, `0003_instagram_connect.sql`, `0004_creator_portal.sql`, `0005_offer_campaign_link.sql`, `0006_packages_pricing.sql`. Порядок важен.
+3. Тем же способом `0002_rls.sql`, `0003_instagram_connect.sql`, `0004_creator_portal.sql`, `0005_offer_campaign_link.sql`, `0006_packages_pricing.sql`, `0007_packages_editing_included.sql`. Порядок важен.
 4. Демо-данные (по желанию): `supabase/seed.sql`.
 5. Authentication → Providers → Email: на этапе MVP **выключи "Confirm email"**,
    иначе после регистрации придётся ходить в почту за подтверждением.
