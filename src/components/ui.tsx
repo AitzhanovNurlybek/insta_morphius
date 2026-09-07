@@ -5,13 +5,15 @@ import { useFormStatus } from "react-dom";
 export function SubmitButton({
   children,
   className = "btn btn-primary",
+  disabled = false,
 }: {
   children: React.ReactNode;
   className?: string;
+  disabled?: boolean;
 }) {
   const { pending } = useFormStatus();
   return (
-    <button type="submit" className={className} disabled={pending}>
+    <button type="submit" className={className} disabled={pending || disabled}>
       {pending ? "Сохраняю…" : children}
     </button>
   );

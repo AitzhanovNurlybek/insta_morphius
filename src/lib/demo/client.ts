@@ -16,9 +16,15 @@ import {
   seedLoginCodes,
   seedOfferApplications,
   seedOffers,
+  seedPackageItems,
+  seedPackages,
+  seedPricingSettings,
   seedProfiles,
+  seedServices,
   seedSessions,
   seedStatusLog,
+  seedSubscriptionItems,
+  seedSubscriptions,
   type Row,
 } from "./seed";
 
@@ -50,6 +56,12 @@ function tables(): Tables {
       offer_applications: empty ? [] : clone(seedOfferApplications),
       creator_login_codes: clone(seedLoginCodes),
       creator_sessions: clone(seedSessions),
+      pricing_settings: clone(seedPricingSettings),
+      services: clone(seedServices),
+      packages: clone(seedPackages),
+      package_items: clone(seedPackageItems),
+      subscriptions: empty ? [] : clone(seedSubscriptions),
+      subscription_items: empty ? [] : clone(seedSubscriptionItems),
     };
   }
   return globalStore.__demoTables;
@@ -78,8 +90,121 @@ function creatorPublic(): Row[] {
     }));
 }
 
+/**
+ * Витрины пакетов повторяют вьюхи из миграции 0006 поле в поле.
+ * Смысл тот же: наружу уходит цена, себестоимость остаётся внутри.
+ * Если здесь случайно появится unit_cost, в демо-режиме утечёт то,
+ * что на боевой базе закрыто на уровне Postgres.
+ */
+function servicePublic(): Row[] {
+  const markup = Number(tables().pricing_settings[0]?.custom_markup_percent ?? 15);
+  return tables()
+    .services.filter((s) => s.active)
+    .map((s) => ({
+      id: s.id,
+      code: s.code,
+      name: s.name,
+      description: s.description,
+      unit: s.unit,
+      unit_forms: s.unit_forms,
+      unit_price: s.markup_exempt
+        ? Number(s.unit_cost)
+        : Math.ceil((Number(s.unit_cost) * (1 + markup / 100)) / 100) * 100,
+      percent_of: s.percent_of,
+      percent:
+        s.percent === null || s.percent === undefined
+          ? null
+          : s.percent_of
+            ? Number((Number(s.percent) * (1 + markup / 100)).toFixed(2))
+            : Number(s.percent),
+      min_qty: s.min_qty,
+      max_qty: s.max_qty,
+      step: s.step,
+      in_builder: s.in_builder,
+      sort: s.sort,
+    }));
+}
+
+function packagePublic(): Row[] {
+  const { packages, package_items, services } = tables();
+  const byId = new Map(services.map((s) => [s.id, s]));
+
+  return packages
+    .filter((p) => p.active)
+    .map((p) => {
+      const items = package_items.filter((i) => i.package_id === p.id);
+      // Транзитные статьи (рекламный бюджет) и процентные считаем отдельно:
+      // наценка ложится только на нашу работу.
+      let billable = 0;
+      let passthrough = 0;
+      for (const i of items) {
+        const s = byId.get(i.service_id);
+        if (!s) continue;
+        const line = Number(i.qty) * Number(s.unit_cost);
+        if (s.percent_of) passthrough += line;
+        else if (s.markup_exempt) passthrough += line;
+        else billable += line;
+      }
+
+      return {
+        id: p.id,
+        code: p.code,
+        name: p.name,
+        tagline: p.tagline,
+        description: p.description,
+        period: p.period,
+        best_for: p.best_for,
+        popular: p.popular,
+        sort: p.sort,
+        price:
+          p.price_override ??
+          Math.ceil(
+            (passthrough + billable * (1 + Number(p.markup_percent) / 100)) / 1000,
+          ) * 1000,
+        items: items
+          .map((i) => ({ service: byId.get(i.service_id), qty: i.qty }))
+          .filter((x) => x.service?.in_builder)
+          .sort((a, b) => Number(a.service?.sort) - Number(b.service?.sort))
+          .map((x) => ({ name: x.service?.name, unit: x.service?.unit, qty: x.qty })),
+      };
+    });
+}
+
+function subscriptionClient(): Row[] {
+  return tables().subscriptions.map((s) => ({
+    id: s.id,
+    business_id: s.business_id,
+    package_id: s.package_id,
+    campaign_id: s.campaign_id,
+    title: s.title,
+    period: s.period,
+    price: s.price,
+    status: s.status,
+    starts_on: s.starts_on,
+    ends_on: s.ends_on,
+    comment: s.comment,
+    created_at: s.created_at,
+  }));
+}
+
+function subscriptionItemClient(): Row[] {
+  return tables().subscription_items.map((i) => ({
+    id: i.id,
+    subscription_id: i.subscription_id,
+    service_code: i.service_code,
+    name: i.name,
+    unit: i.unit,
+    qty: i.qty,
+    line_price: i.line_price,
+  }));
+}
+
 function readTable(name: string): Row[] {
   if (name === "creator_public") return creatorPublic();
+  if (name === "service_public") return servicePublic();
+  if (name === "package_public") return packagePublic();
+  if (name === "subscription_client") return subscriptionClient();
+  if (name === "subscription_item_client") return subscriptionItemClient();
   return tables()[name] ?? [];
 }
 
@@ -133,6 +258,19 @@ const DEFAULTS: Record<string, () => Row> = {
   offers: () => ({ status: "open", niches: [], formats: [], shoot_days: 1, slots: 1, city: "Алматы", business_id: null, campaign_id: null, perks: null, description: null, deadline: null }),
   offer_applications: () => ({ status: "applied", note: null }),
   creator_login_codes: () => ({ attempts: 0, used_at: null }),
+  subscriptions: () => ({
+    status: "pending",
+    period: "month",
+    package_id: null,
+    campaign_id: null,
+    starts_on: null,
+    ends_on: null,
+    comment: null,
+    markup_percent: 15,
+    agency_share_percent: 22,
+    updated_at: new Date().toISOString(),
+  }),
+  subscription_items: () => ({ qty: 1, unit_cost: 0, line_cost: 0, line_price: 0 }),
 };
 
 type RelDef = { table: string; fk: string; kind: "one" | "many" };
@@ -152,6 +290,11 @@ const RELATIONS: Record<string, Record<string, RelDef>> = {
     creators: { table: "creators", fk: "creator_id", kind: "one" },
   },
   offers: { offer_applications: { table: "offer_applications", fk: "offer_id", kind: "many" } },
+  subscriptions: {
+    businesses: { table: "businesses", fk: "business_id", kind: "one" },
+    subscription_items: { table: "subscription_items", fk: "subscription_id", kind: "many" },
+    campaigns: { table: "campaigns", fk: "campaign_id", kind: "one" },
+  },
 };
 
 type RelNode = { name: string; inner: string };

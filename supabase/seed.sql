@@ -66,3 +66,34 @@ values
    'Тренировка с тренером, съёмка зала и бассейна. Утро буднего дня.',
    'Алматы', '{Sport,Health}', '{Reels}', 10000, 12000, 1, 2,
    'Месяц абонемента', current_date + 18);
+
+-- Демо-подписки. Справочник услуг и пакеты приезжают самой миграцией 0006,
+-- здесь только пример «кто уже купил», чтобы экран «Деньги» не был пустым.
+insert into subscriptions (business_id, package_id, title, period, price, cost,
+                           markup_percent, agency_share_percent, status, starts_on, ends_on)
+select b.id, p.id, p.name, 'month', 300000,
+       (select sum(case when s.percent_of is null
+                        then pi.qty * s.unit_cost
+                        else round(45000 * s.percent / 100) end)
+          from package_items pi join services s on s.id = pi.service_id
+         where pi.package_id = p.id),
+       p.markup_percent, 22, 'active', current_date - 20, current_date + 10
+from businesses b, packages p
+where p.code = 'growth' and b.name = 'Кофейня Ошақ'
+limit 1;
+
+insert into subscription_items (subscription_id, service_code, name, unit, qty,
+                                unit_cost, line_cost, line_price)
+select sub.id, s.code, s.name, s.unit,
+       case when s.percent_of is null then pi.qty else 1 end,
+       s.unit_cost,
+       case when s.percent_of is null then pi.qty * s.unit_cost
+            else round(45000 * s.percent / 100) end,
+       case when s.markup_exempt then pi.qty * s.unit_cost
+            when s.percent_of is null then round(pi.qty * s.unit_cost * 1.12)
+            else round(45000 * s.percent / 100 * 1.12) end
+from subscriptions sub
+join packages p on p.id = sub.package_id
+join package_items pi on pi.package_id = p.id
+join services s on s.id = pi.service_id
+where p.code = 'growth';

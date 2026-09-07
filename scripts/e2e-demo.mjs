@@ -285,6 +285,77 @@ if (canDecide) {
   check("после согласования начались съёмки", afterApprove.includes("Идут съёмки"));
 }
 
+// 11g. Тарифы, конструктор и бухгалтерия.
+// Главная проверка здесь — не «страница открылась», а что себестоимость
+// не уехала в браузер клиента: весь смысл разделения витрин в этом.
+await browser.setCookie({ name: "demo_role", value: "business", domain: "localhost", path: "/" });
+await page.goto(`${BASE}/business/plans`, { waitUntil: "networkidle2" });
+
+// Прогон должен проходить и на замусоренных данных: если заявка осталась
+// с прошлого раза, отзываем её, иначе сработает запрет на вторую.
+if ((await page.$eval("body", (e) => e.innerText)).includes("Отозвать заявку")) {
+  await Promise.all([
+    page.waitForNavigation({ waitUntil: "networkidle2" }),
+    page.click("xpath=//button[contains(., 'Отозвать заявку')]"),
+  ]);
+}
+
+const plansHtml = await page.content();
+const leaked = ["unit_cost", "line_cost", "markup_percent", "себестоимост"].filter((w) =>
+  plansHtml.includes(w),
+);
+check("себестоимость не утекает клиенту", leaked.length === 0, leaked.join(", "));
+
+const priceBefore = await page.$eval("form .t-display", (e) => e.innerText);
+await page.click("xpath=(//button[text()='+'])[1]");
+await new Promise((r) => setTimeout(r, 150));
+const priceAfter = await page.$eval("form .t-display", (e) => e.innerText);
+check("конструктор пересчитывает цену", priceBefore !== priceAfter, `${priceBefore} → ${priceAfter}`);
+
+await Promise.all([
+  page.waitForNavigation({ waitUntil: "networkidle2" }),
+  page.click("xpath=//button[contains(., 'Отправить заявку')]"),
+]);
+const ordered = await page.$eval("body", (e) => e.innerText);
+check("заявка на пакет отправлена", ordered.includes("Заявка у агентства"));
+
+// Цена на экране и цена в счёте должны совпасть до тенге
+const digits = (s) => Number(String(s).replace(/[^\d]/g, ""));
+await browser.setCookie({ name: "demo_role", value: "admin", domain: "localhost", path: "/" });
+await page.goto(`${BASE}/admin/finance`, { waitUntil: "networkidle2" });
+const financeText = await page.$eval("body", (e) => e.innerText);
+const pendingLine = financeText.split("\n").find((l) => l.includes("· себестоимость")) ?? "";
+check(
+  "цена в кабинете и в бухгалтерии совпала",
+  digits(pendingLine.split("·")[0]) === digits(priceAfter),
+  `${priceAfter} против ${pendingLine.split("·")[0]?.trim()}`,
+);
+check("бухгалтерия показывает маржу", financeText.includes("Маржа"));
+
+// Повторная заявка поверх неразобранной — самый частый способ засорить список
+await browser.setCookie({ name: "demo_role", value: "business", domain: "localhost", path: "/" });
+await page.goto(`${BASE}/business/plans`, { waitUntil: "networkidle2" });
+await Promise.all([
+  page.waitForNavigation({ waitUntil: "networkidle2" }),
+  page.click("xpath=//button[contains(., 'Отправить заявку')]"),
+]);
+check(
+  "вторая заявка не создаётся",
+  (await page.$eval("body", (e) => e.innerText)).includes("уже ждёт ответа"),
+);
+
+// Клиент не должен попадать во внутренний прайс
+await page.goto(`${BASE}/admin/services`, { waitUntil: "networkidle2" });
+check("клиента не пускает в прайс агентства", !page.url().includes("/admin/services"));
+
+await browser.setCookie({ name: "demo_role", value: "admin", domain: "localhost", path: "/" });
+await page.goto(`${BASE}/admin/services`, { waitUntil: "networkidle2" });
+// innerText отдаёт отрисованный текст, а заголовки таблиц набраны капсом
+// через CSS — сравнивать по регистру здесь значит ловить оформление, а не смысл
+const priceList = (await page.$eval("body", (e) => e.innerText)).toLowerCase();
+check("прайс агентства показывает себестоимость", priceList.includes("цена клиенту"));
+check("видно, где маржа расходится с целевой", priceList.includes("фактическая наценка"));
+
 // 11f. Служебные страницы не белый лист
 await browser.setCookie({ name: "demo_role", value: "admin", domain: "localhost", path: "/" });
 await page.goto(`${BASE}/admin/campaigns/nope-not-here`, { waitUntil: "networkidle2" });

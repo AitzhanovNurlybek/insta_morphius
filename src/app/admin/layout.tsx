@@ -14,7 +14,7 @@ export default async function AdminLayout({
   await requireAdmin();
   const supabase = await createClient();
 
-  const [briefs, applications] = await Promise.all([
+  const [briefs, applications, pendingSubs] = await Promise.all([
     supabase
       .from("campaigns")
       .select("id", { count: "exact", head: true })
@@ -23,6 +23,10 @@ export default async function AdminLayout({
       .from("offer_applications")
       .select("id", { count: "exact", head: true })
       .eq("status", "applied"),
+    supabase
+      .from("subscriptions")
+      .select("id", { count: "exact", head: true })
+      .eq("status", "pending"),
   ]);
 
   const nav = [
@@ -37,6 +41,12 @@ export default async function AdminLayout({
       count: applications.count ?? 0,
     },
     { href: "/admin/businesses", label: "Клиенты", icon: "building" },
+    {
+      href: "/admin/finance",
+      label: "Деньги",
+      icon: "money",
+      count: pendingSubs.count ?? 0,
+    },
   ];
 
   return (

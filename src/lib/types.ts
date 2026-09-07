@@ -173,3 +173,87 @@ export type OfferApplication = {
   note: string | null;
   created_at: string;
 };
+
+// ─────────────────────────  ПАКЕТЫ И ДЕНЬГИ  ─────────────────────────
+
+export type SubscriptionStatus =
+  | "pending"
+  | "active"
+  | "paused"
+  | "finished"
+  | "cancelled";
+
+export type BillingPeriod = "two_weeks" | "month";
+
+/** Внутренняя карточка услуги: unit_cost клиенту не уходит никогда. */
+export type Service = {
+  id: string;
+  code: string;
+  name: string;
+  description: string | null;
+  unit: string;
+  unit_forms: string[];
+  unit_cost: number;
+  markup_exempt: boolean;
+  percent_of: string | null;
+  percent: number | null;
+  min_qty: number;
+  max_qty: number;
+  step: number;
+  in_builder: boolean;
+  sort: number;
+  active: boolean;
+};
+
+export type PackageItemPublic = { name: string; unit: string; qty: number };
+
+export type PackagePublic = {
+  id: string;
+  code: string;
+  name: string;
+  tagline: string | null;
+  description: string | null;
+  period: BillingPeriod;
+  best_for: string | null;
+  popular: boolean;
+  sort: number;
+  price: number;
+  items: PackageItemPublic[] | null;
+};
+
+export type Subscription = {
+  id: string;
+  business_id: string;
+  package_id: string | null;
+  campaign_id: string | null;
+  title: string;
+  period: BillingPeriod;
+  price: number;
+  cost: number;
+  markup_percent: number;
+  agency_share_percent: number;
+  status: SubscriptionStatus;
+  starts_on: string | null;
+  ends_on: string | null;
+  comment: string | null;
+  created_at: string;
+};
+
+export type SubscriptionItem = {
+  id: string;
+  subscription_id: string;
+  service_code: string;
+  name: string;
+  unit: string;
+  qty: number;
+  unit_cost: number;
+  line_cost: number;
+  line_price: number;
+};
+
+export type PricingSettings = {
+  id: boolean;
+  custom_markup_percent: number;
+  agency_share_percent: number;
+  currency: string;
+};

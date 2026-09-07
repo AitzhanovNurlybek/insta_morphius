@@ -404,3 +404,298 @@ export const seedOfferApplications: Row[] = [
 
 export const seedLoginCodes: Row[] = [];
 export const seedSessions: Row[] = [];
+
+// ─────────────────────────  ПАКЕТЫ, УСЛУГИ, ПОДПИСКИ  ─────────────────────────
+// Цифры — из внутреннего расчёта агентства (условия сотрудничества, v3).
+// Флэт-статьи разложены на единицы, чтобы старший тариф давал клиенту больше
+// работы, а не только больший счёт.
+
+export const seedPricingSettings: Row[] = [
+  { id: true, custom_markup_percent: 15, agency_share_percent: 22, currency: "₸" },
+];
+
+const service = (
+  code: string,
+  name: string,
+  description: string,
+  unit: string,
+  unit_forms: string[],
+  unit_cost: number,
+  sort: number,
+  extra: Row = {},
+): Row => ({
+  id: `sv-${code}`,
+  code,
+  name,
+  description,
+  unit,
+  unit_forms,
+  unit_cost,
+  markup_exempt: false,
+  percent_of: null,
+  percent: null,
+  min_qty: 0,
+  max_qty: 30,
+  step: 1,
+  in_builder: true,
+  sort,
+  active: true,
+  created_at: iso(-60),
+  ...extra,
+});
+
+export const seedServices: Row[] = [
+  service("creator_day", "Съёмочный день блогера",
+    "UGC-креатор из нашей базы снимает у вас день по сценарию",
+    "съёмочный день", ["день", "дня", "дней"], 7000, 10),
+
+  service("mobilographer_day", "День мобилографа",
+    "Наш мобилограф снимает интерьер, продукт, процесс",
+    "смена", ["смена", "смены", "смен"], 15000, 20, { max_qty: 20 }),
+
+  service("editing", "Монтаж ролика",
+    "Сборка, субтитры, музыка, адаптация под Reels и TikTok",
+    "ролик", ["ролик", "ролика", "роликов"], 5000, 30, { max_qty: 40 }),
+
+  service("ad_budget", "Рекламный бюджет",
+    "Деньги, которые уходят напрямую в Meta Ads — мы на них не зарабатываем",
+    "₸ бюджета", [], 1, 40, { max_qty: 1_000_000, step: 5000, markup_exempt: true }),
+
+  service("targeting", "Ведение таргета",
+    "Настройка кампаний, тесты креативов, отчёт по заявкам",
+    "от бюджета", [], 0, 50,
+    { percent_of: "ad_budget", percent: 30, in_builder: false, max_qty: 1 }),
+
+  service("tools", "Сервисы и доступы",
+    "Хранилище, лицензии на музыку, аналитика",
+    "месяц", ["месяц", "месяца", "месяцев"], 15000, 60,
+    { in_builder: false, min_qty: 1, max_qty: 1 }),
+];
+
+export const seedPackages: Row[] = [
+  {
+    id: "pk-start",
+    code: "start",
+    name: "START",
+    tagline: "Попробовать, не рискуя бюджетом",
+    description:
+      "Четыре съёмочных дня, четыре ролика и первый таргет. Хватает, чтобы понять, работает ли формат на вашей аудитории.",
+    period: "month",
+    markup_percent: 12,
+    price_override: 180000,
+    best_for: "Небольшое кафе, салон, студия — первый заход в UGC",
+    popular: false,
+    sort: 10,
+    active: true,
+    created_at: iso(-60),
+  },
+  {
+    id: "pk-growth",
+    code: "growth",
+    name: "GROWTH",
+    tagline: "Регулярный поток контента",
+    description:
+      "Девять съёмочных дней и восемь роликов в месяц: лента не пустеет, таргет крутится на свежих креативах.",
+    period: "month",
+    markup_percent: 12,
+    price_override: 300000,
+    best_for: "Сеть из двух-трёх точек, стабильный поток заявок",
+    popular: true,
+    sort: 20,
+    active: true,
+    created_at: iso(-60),
+  },
+  {
+    id: "pk-performance",
+    code: "performance",
+    name: "PERFORMANCE",
+    tagline: "Максимум охвата и тестов",
+    description:
+      "Двадцать съёмочных дней и двенадцать роликов: хватает на несколько связок креативов и постоянные тесты.",
+    period: "month",
+    markup_percent: 12,
+    price_override: 500000,
+    best_for: "Развитый бренд, несколько продуктов, свой отдел продаж",
+    popular: false,
+    sort: 30,
+    active: true,
+    created_at: iso(-60),
+  },
+];
+
+const packItem = (pkg: string, code: string, qty: number): Row => ({
+  id: `pi-${pkg}-${code}`,
+  package_id: `pk-${pkg}`,
+  service_id: `sv-${code}`,
+  qty,
+});
+
+export const seedPackageItems: Row[] = [
+  packItem("start", "creator_day", 4),
+  packItem("start", "mobilographer_day", 3),
+  packItem("start", "editing", 4),
+  packItem("start", "ad_budget", 45000),
+  packItem("start", "targeting", 1),
+  packItem("start", "tools", 1),
+
+  packItem("growth", "creator_day", 9),
+  packItem("growth", "mobilographer_day", 3),
+  packItem("growth", "editing", 8),
+  packItem("growth", "ad_budget", 45000),
+  packItem("growth", "targeting", 1),
+  packItem("growth", "tools", 1),
+
+  packItem("performance", "creator_day", 20),
+  packItem("performance", "mobilographer_day", 3),
+  packItem("performance", "editing", 12),
+  packItem("performance", "ad_budget", 45000),
+  packItem("performance", "targeting", 1),
+  packItem("performance", "tools", 1),
+];
+
+// Подписки и их состав считаем из справочника, а не выписываем руками:
+// вручную набранные суммы разъезжаются с составом пакетов при первой же правке
+// цены, и демо начинает показывать арифметику, которой не бывает.
+
+const CUSTOM_MARKUP = 15;
+const byCode = new Map(seedServices.map((s) => [s.code as string, s]));
+
+const unitPriceOf = (code: string, markup: number): number => {
+  const s = byCode.get(code);
+  if (!s) return 0;
+  if (s.markup_exempt) return Number(s.unit_cost);
+  return Math.ceil((Number(s.unit_cost) * (1 + markup / 100)) / 100) * 100;
+};
+
+/** Строки подписки: себестоимость и цена по тем же правилам, что и в продукте. */
+function buildItems(sub: string, qty: Record<string, number>, markup: number) {
+  const items: Row[] = [];
+  let cost = 0;
+  let price = 0;
+
+  const budgetCost = (qty.ad_budget ?? 0) * Number(byCode.get("ad_budget")?.unit_cost ?? 1);
+
+  for (const s of seedServices) {
+    const code = s.code as string;
+    const n = s.percent_of ? 1 : (qty[code] ?? 0);
+    if (!n) continue;
+
+    const lineCost = s.percent_of
+      ? Math.round((budgetCost * Number(s.percent)) / 100)
+      : n * Number(s.unit_cost);
+    const linePrice = s.percent_of
+      ? Math.round((budgetCost * Number(s.percent) * (1 + markup / 100)) / 100)
+      : n * unitPriceOf(code, markup);
+
+    if (!lineCost) continue;
+    cost += lineCost;
+    price += linePrice;
+    items.push({
+      id: `si-${sub}-${code}`,
+      subscription_id: `sb-${sub}`,
+      service_code: code,
+      name: s.name,
+      unit: s.unit,
+      qty: s.percent_of ? 1 : n,
+      unit_cost: s.percent_of ? lineCost : Number(s.unit_cost),
+      line_cost: lineCost,
+      line_price: linePrice,
+    });
+  }
+
+  return { items, cost, price: Math.ceil(price / 1000) * 1000 };
+}
+
+/** Строки готового тарифа приводим к витринной цене — как это делает продукт. */
+function atPrice(built: ReturnType<typeof buildItems>, target: number) {
+  const own = built.items.filter((i) => !byCode.get(String(i.service_code))?.markup_exempt);
+  const transit = built.items
+    .filter((i) => byCode.get(String(i.service_code))?.markup_exempt)
+    .reduce((s, i) => s + Number(i.line_price), 0);
+  const ownTotal = own.reduce((s, i) => s + Number(i.line_price), 0);
+  const k = ownTotal > 0 ? (target - transit) / ownTotal : 1;
+
+  for (const i of own) i.line_price = Math.round(Number(i.line_price) * k);
+  const diff = target - built.items.reduce((s, i) => s + Number(i.line_price), 0);
+  if (diff !== 0 && own.length) {
+    const biggest = own.reduce((a, b) => (Number(b.line_price) > Number(a.line_price) ? b : a));
+    biggest.line_price = Number(biggest.line_price) + diff;
+  }
+  return built;
+}
+
+const qtyOf = (pkg: string): Record<string, number> =>
+  Object.fromEntries(
+    seedPackageItems
+      .filter((i) => i.package_id === `pk-${pkg}`)
+      .map((i) => [String(i.service_id).replace("sv-", ""), Number(i.qty)]),
+  );
+
+const growth = atPrice(buildItems("1", qtyOf("growth"), 12), 300000);
+const start = atPrice(buildItems("2", qtyOf("start"), 12), 180000);
+const custom = buildItems(
+  "3",
+  { creator_day: 2, mobilographer_day: 8, editing: 6, ad_budget: 20000, tools: 1 },
+  CUSTOM_MARKUP,
+);
+
+export const seedSubscriptions: Row[] = [
+  {
+    id: "sb-1",
+    business_id: "bs-1",
+    package_id: "pk-growth",
+    campaign_id: "cm-1",
+    title: "GROWTH",
+    period: "month",
+    // У готового тарифа цена витринная, из прайса, а не расчётная:
+    // клиент видит круглое число, а не результат умножения.
+    price: 300000,
+    cost: growth.cost,
+    markup_percent: 12,
+    agency_share_percent: 22,
+    status: "active",
+    starts_on: day(-20),
+    ends_on: day(10),
+    comment: null,
+    created_at: iso(-21),
+    updated_at: iso(-21),
+  },
+  {
+    id: "sb-2",
+    business_id: "bs-2",
+    package_id: "pk-start",
+    campaign_id: "cm-2",
+    title: "START",
+    period: "month",
+    price: 180000,
+    cost: start.cost,
+    markup_percent: 12,
+    agency_share_percent: 22,
+    status: "active",
+    starts_on: day(-25),
+    ends_on: day(5),
+    comment: null,
+    created_at: iso(-26),
+    updated_at: iso(-26),
+  },
+  {
+    id: "sb-3",
+    business_id: "bs-3",
+    package_id: null,
+    campaign_id: null,
+    title: "Своя сборка",
+    period: "month",
+    price: custom.price,
+    cost: custom.cost,
+    markup_percent: CUSTOM_MARKUP,
+    agency_share_percent: 22,
+    status: "pending",
+    starts_on: null,
+    ends_on: null,
+    comment: "Нужен упор на мобилографа, блогеров по минимуму",
+    created_at: iso(-1),
+    updated_at: iso(-1),
+  },
+];
+
+export const seedSubscriptionItems: Row[] = [...growth.items, ...start.items, ...custom.items];
